@@ -6,6 +6,7 @@ var two = new Two(params).appendTo(elem);
 var RADIUS = 30;
 var NUM_HORIZONTAL_HEX = 10;
 var NUM_VERTICAL_HEX = 10;
+var selected_hex = null;
 
 var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
 
@@ -28,22 +29,33 @@ function makeHexagon(x, y) {
 		//two.update();
 	});
 
+	$("#" + hexagon.id).on('click', function() {
+		var id = $(this).attr('id');
+		console.log(id);
+		if (id !== selected_hex){
+			if (selected_hex !== null)
+				$("#"+selected_hex).removeClass('clicked');
+			selected_hex = id;
+			$(this).addClass('clicked');
+
+		}
+	});
+
 	return hexagon;
 }
 
-// for (var i = 0; i < 4; i++) {
-// 	for (var j = 0; j < 4; j++) {
-// 		makeHexagon(44 + 43*2*j + 43*i, 50 + 75*i);
-// 	}
-// }
+var hexagonMap = {};
 for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
 	for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
 		var x = horizontalDistance + 2*j*horizontalDistance + (i % 2) * horizontalDistance;
 		var y = RADIUS + 1.5*i*RADIUS;
-		makeHexagon(x, y);
+		var hexagon = makeHexagon(x, y);
+
+		hexagonMap[hexagon.id] = hexagon;
 	}
 }
 
+/*
 makeHexagon(200, 500);
 
 var anchor1 = new Two.Anchor(200 - 21, 500 - 37, 0, 0, 21, 27, Two.Commands.curve);
@@ -52,9 +64,7 @@ var anchor2 = new Two.Anchor(200 - 21, 500 + 37, 21, -27, 0, 500, Two.Commands.c
 var path = two.makeCurve([anchor1, anchor2], true);
 path.linewidth = 1;
 path.stroke = "#aaaaaa";
-path.fill = '#eeeeee';
-
-two.update();
+path.fill = '#eeeeee';*/
 
 
 

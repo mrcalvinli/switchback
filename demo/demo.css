@@ -10,3 +10,6 @@ body {
 .hover {
 	fill: #aaeeee;
 }
+.clicked {
+	fill: #eeaaaa;
+}
