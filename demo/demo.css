@@ -1,0 +1,9 @@
+#drawCanvas {
+	height: 700;
+	width: 700;
+	border: black solid 1px;
+}
+
+body {
+	margin: 0;
+}
