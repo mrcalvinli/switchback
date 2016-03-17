@@ -1,59 +1,61 @@
-var elem = document.getElementById('drawCanvas');
-console.log(elem);
-var params = {width: 700, height: 700};
-var two = new Two(params).appendTo(elem);
+$(document).ready(function() {
+    var elem = document.getElementById('drawCanvas');
+    console.log(elem);
+    var params = {width: 700, height: 700};
+    var two = new Two(params).appendTo(elem);
 
-var RADIUS = 30;
-var NUM_HORIZONTAL_HEX = 10;
-var NUM_VERTICAL_HEX = 10;
-var selected_hex = null;
+    var RADIUS = 30;
+    var NUM_HORIZONTAL_HEX = 10;
+    var NUM_VERTICAL_HEX = 10;
+    var selected_hex = null;
 
-var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
+    var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
 
-function makeHexagon(x, y) {
-	var hexagon = two.makePolygon(x, y, RADIUS, 6);
+    function makeHexagon(x, y) {
+        var hexagon = two.makePolygon(x, y, RADIUS, 6);
 
-	hexagon.fill = '#eeeeee';
-	hexagon.stroke = '#aaaaaa';
-	hexagon.linewidth = 1;
-	hexagon.rotation = Math.PI / 6;
-	two.update();
+        hexagon.fill = '#eeeeee';
+        hexagon.stroke = '#aaaaaa';
+        hexagon.linewidth = 1;
+        hexagon.rotation = Math.PI / 6;
+        two.update();
 
-	$("#" + hexagon.id).hover(function() {
-		//hexagon.fill = '#aaeeee';
-		$(this).addClass("hover");
-		//two.update();
-	}, function() {
-		//hexagon.fill = '#eeeeee';
-		$(this).removeClass("hover");
-		//two.update();
-	});
+        $("#" + hexagon.id).hover(function() {
+            //hexagon.fill = '#aaeeee';
+            $(this).addClass("hover");
+            //two.update();
+        }, function() {
+            //hexagon.fill = '#eeeeee';
+            $(this).removeClass("hover");
+            //two.update();
+        });
 
-	$("#" + hexagon.id).on('click', function() {
-		var id = $(this).attr('id');
-		console.log(id);
-		if (id !== selected_hex){
-			if (selected_hex !== null)
-				$("#"+selected_hex).removeClass('clicked');
-			selected_hex = id;
-			$(this).addClass('clicked');
+        $("#" + hexagon.id).on('click', function() {
+            var id = $(this).attr('id');
+            console.log(id);
+            if (id !== selected_hex){
+                if (selected_hex !== null)
+                    $("#"+selected_hex).removeClass('clicked');
+                selected_hex = id;
+                $(this).addClass('clicked');
 
-		}
-	});
+            }
+        });
 
-	return hexagon;
-}
+        return hexagon;
+    }
 
-var hexagonMap = {};
-for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
-	for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
-		var x = horizontalDistance + 2*j*horizontalDistance + (i % 2) * horizontalDistance;
-		var y = RADIUS + 1.5*i*RADIUS;
-		var hexagon = makeHexagon(x, y);
+    var hexagonMap = {};
+    for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
+        for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
+            var x = horizontalDistance + 2*j*horizontalDistance + (i % 2) * horizontalDistance;
+            var y = RADIUS + 1.5*i*RADIUS;
+            var hexagon = makeHexagon(x, y);
 
-		hexagonMap[hexagon.id] = hexagon;
-	}
-}
+            hexagonMap[hexagon.id] = hexagon;
+        }
+    }
+});
 
 /*
 makeHexagon(200, 500);

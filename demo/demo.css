@@ -1,15 +1,15 @@
 #drawCanvas {
-	height: 700;
-	width: 700;
-	border: black solid 1px;
+    height: 700;
+    width: 700;
+    border: black solid 1px;
 }
 
 body {
-	margin: 0;
+    margin: 0;
 }
 .hover {
-	fill: #aaeeee;
+    fill: #aaeeee;
 }
 .clicked {
-	fill: #eeaaaa;
+    fill: #eeaaaa;
 }
