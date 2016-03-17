@@ -1,6 +1,5 @@
 $(document).ready(function() {
     var elem = document.getElementById('drawCanvas');
-    console.log(elem);
     var params = {width: 700, height: 700};
     var two = new Two(params).appendTo(elem);
 
@@ -11,38 +10,27 @@ $(document).ready(function() {
 
     var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
 
-    function makeHexagon(x, y) {
-        var hexagon = two.makePolygon(x, y, RADIUS, 6);
-
-        hexagon.fill = '#eeeeee';
-        hexagon.stroke = '#aaaaaa';
-        hexagon.linewidth = 1;
-        hexagon.rotation = Math.PI / 6;
-        two.update();
-
-        $("#" + hexagon.id).hover(function() {
-            //hexagon.fill = '#aaeeee';
-            $(this).addClass("hover");
-            //two.update();
+    /**
+     * Adding event handlers to hexagon
+     */
+    var addHexagonEventHandlers = function(hexagon) {
+        var hexagonDOM = $('#' + hexagon.getId());
+        
+        hexagonDOM.hover(function() {
+            hexagon.hoverMode(true);
         }, function() {
-            //hexagon.fill = '#eeeeee';
-            $(this).removeClass("hover");
-            //two.update();
+            hexagon.hoverMode(false);
         });
 
-        $("#" + hexagon.id).on('click', function() {
+        hexagonDOM.on('click', function() {
             var id = $(this).attr('id');
-            console.log(id);
             if (id !== selected_hex){
                 if (selected_hex !== null)
-                    $("#"+selected_hex).removeClass('clicked');
+                    hexagonMap[selected_hex].clickedMode(false);
                 selected_hex = id;
-                $(this).addClass('clicked');
-
+                hexagonMap[id].clickedMode(true);
             }
         });
-
-        return hexagon;
     }
 
     var hexagonMap = {};
@@ -50,9 +38,11 @@ $(document).ready(function() {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
             var x = horizontalDistance + 2*j*horizontalDistance + (i % 2) * horizontalDistance;
             var y = RADIUS + 1.5*i*RADIUS;
-            var hexagon = makeHexagon(x, y);
+            var hexagon = Hexagon(two, x, y, RADIUS)
 
-            hexagonMap[hexagon.id] = hexagon;
+            addHexagonEventHandlers(hexagon);
+
+            hexagonMap[hexagon.getId()] = hexagon;
         }
     }
 });
