@@ -41,6 +41,14 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
     };
 
+    var doesPathExist = function(edge1, edge2) {
+        if (edge1 > edge2) {
+            return doesPathExist(edge2, edge1);
+        }
+
+        return (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null);
+    }
+
     var drawPath = function(edge1, edge2) {
         if (edge1 > edge2) {
             return drawLine(edge2, edge1);
@@ -116,6 +124,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         getId: getId,
         hoverMode: hoverMode,
         clickedMode: clickedMode,
+        doesPathExist: doesPathExist,
         drawPath: drawPath,
         removePath: removePath,
         remove: remove
