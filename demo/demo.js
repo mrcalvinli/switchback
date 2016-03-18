@@ -13,6 +13,16 @@ $(document).ready(function() {
     var selected_item = null;
     var mouse = null;
 
+    var getHexFromPos = function(x,y){
+        console.log(x+", "+y);
+        var num = Math.floor(y/(1.5*RADIUS))*NUM_HORIZONTAL_HEX+
+                  Math.floor(x/(2*horizontalDistance))+9;
+        console.log(Math.floor(y/(1.5*RADIUS))+", "+Math.floor(x/(2*horizontalDistance)));
+        var hex = $('#drawCanvas').find('#two_'+num);
+        console.log(hex);
+        return hex;
+    }
+
     
 
     /**
@@ -62,15 +72,67 @@ $(document).ready(function() {
                 $(this).addClass('clicked');
                 $("#drawCanvas").bind('mousemove', function(e){
                     if (mouse !== null)
-                        mouse.remove(two);
+                        mouse.remove();
                     mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
+                    mouse.drawPath(1,4);
+                    console.log("hi");
+                    mouse.setFill("rgba(0,0,0,0)");
                     two.update();
+                });
+                $("#drawCanvas").on('mousedown', function(e) {
+                    var id = getHexFromPos(e.clientX,e.clientY).attr('id');
+                    if (selected_item !== null){
+                        $("#drawCanvas").unbind("mousemove");
+                        $("#drawCanvas").bind("mousemove", function(e){
+                            var dy = hexagonMap[id].getPosition().y - e.clientY;
+                            var dx = hexagonMap[id].getPosition().x - e.clientX;
+                            var theta = Math.atan2(dy,dx) * 180/Math.PI;
+
+                            mouse.removeLines();
+                            if (theta > 90 && theta <= 150){
+                                //mouse.removeLines();
+                                mouse.drawPath(1,4);
+                            }
+                            else if (theta <= 90 && theta > 30){
+                                //mouse.removeLines();
+                                mouse.drawPath(2,5);
+                            }
+                            else if (theta <= 30 && theta > -30){
+                                //mouse.removeLines();
+                                mouse.drawPath(3,6);
+                            }
+                            else if (theta <= -30 && theta > -90){
+                                //mouse.removeLines();
+                                mouse.drawPath(4,1);
+                            }
+                            else if (theta <= -90 && theta > -150){
+                                //mouse.removeLines();
+                                mouse.drawPath(5,2);
+                            } else {
+                                //mouse.removeLines();
+                                mouse.drawPath(6,3);
+                            }
+                            mouse.removeLines();
+                        });
+                    }
+                });
+                $("#drawCanvas").on('mouseup', function(e) {
+                    mouse.removeLines();
+                    $("#drawCanvas").unbind("mousemove");
+                    $("#drawCanvas").bind("mousemove", function(e){
+                        if (mouse !== null)
+                            mouse.remove();
+                        mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
+                        mouse.drawPath(1,4);
+                        mouse.setFill("rgba(0,0,0,0)");
+                        two.update();
+                    });
                 });
 
             } else {
                 selected_item = null;
                 if (mouse !== null){
-                        mouse.remove(two);
+                        mouse.remove();
                         two.update();
                         mouse = null;
                 }

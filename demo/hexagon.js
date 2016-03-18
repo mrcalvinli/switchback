@@ -50,11 +50,16 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     }
 
     var drawPath = function(edge1, edge2) {
+        
         if (edge1 > edge2) {
             return drawLine(edge2, edge1);
         }
 
+        if (doesPathExist(edge1,edge2)){
+            return;
+        }
         if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] === null) {
+
             var line = drawLine(edge1, edge2);
             pathLines[edge1] = line;
         } else {
@@ -64,7 +69,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
     var removePath = function(edge1, edge2) {
         if (edge1 > edge2) {
-            return removeEdge(edge2, edge1);
+            return removePath(edge2, edge1);
         }
 
         if (Math.abs(edge1 - edge2) === 3) {
@@ -75,13 +80,37 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
     }
 
-    var remove = function(two){
-        two.remove(hexagon);
+    var remove = function(){
+        two.remove(hexagon)
+        removeLines();
+        two.update();
     };
+
+    var removeLines = function(){
+        removePath(1,4);
+        removePath(3,6);
+        removePath(2,5);
+        two.update();
+    }
+
+    var getPosition = function(){
+        return {x: xCenter, y: yCenter};
+    }
+
+    var setFill = function(fill){
+        hexagon.fill = fill;
+        two.update();
+    }
+
+    var rotate = function(angle){
+        hexagon.rotation = angle;
+        two.update();
+    }
 
     //====== Private Methods ==============
 
     var drawLine = function(edge1, edge2) {
+        console.log("drawing");
         var dx;
         var dy;
         if (edge1 === 1) {
@@ -127,6 +156,10 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         doesPathExist: doesPathExist,
         drawPath: drawPath,
         removePath: removePath,
-        remove: remove
+        remove: remove,
+        removeLines: removeLines,
+        getPosition: getPosition,
+        setFill: setFill,
+        rotate: rotate
     };
 }
