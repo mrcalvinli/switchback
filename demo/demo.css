@@ -2,6 +2,7 @@
     height: 700;
     width: 700;
     border: black solid 1px;
+    display: inline-block;
 }
 
 body {
@@ -12,4 +13,60 @@ body {
 }
 .clicked {
     fill: #eeaaaa;
+    background-color: #eeaaaa;
+}
+
+#track-menu {
+    height: 500;
+    width: 300;
+    border: 10px rgba(0,172, 237, 1) solid; 
+    border-radius: 10px;
+    display: inline-block;
+    top: 0px;
+    position: absolute;
+    background-color: rgba(0, 172, 237, 1);
+}
+
+#track-types {
+    height: 480;
+    width: 280;
+    border: 10px #69d6ff solid;
+    border-radius: 10px;
+    display: inline-block;
+    top: 0px;
+    position: absolute;
+    background-color: #69d6ff;
+}
+
+.menu-col {
+    display: inline-block;
+    width: 75px;
+    height: 100%;
+    margin-left: 6px;
+    margin-right: 6px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.menu-header {
+    border: 2px solid white;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    font-family: "Impact", Charcoal, sans-serif;
+    color: white;
+    font-size: 20px;
+
+}
+
+.item-list {
+    border: 2px solid white;
+    border-radius: 3px;
+}
+
+.item {
+    border: 2px solid white;
+    border-radius: 3px;
+    margin: 5px auto 5px;
+    height: 65px;
+    width: 65px;
 }
