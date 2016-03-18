@@ -34,11 +34,13 @@ $(document).ready(function() {
                     hexagonMap[selected_hex].clickedMode(false);
                 selected_hex = id;
                 hexagonMap[id].clickedMode(true);
-                //hexagonMap[id].drawPath(3, 6);
+                hexagonMap[id].drawPath(3, 6);
             } else {
                 hexagonMap[selected_hex].clickedMode(false);
+                hexagonMap[selected_hex].removePath(3, 6);
                 selected_hex = null;
             }
+            two.update();
         });
     }
 

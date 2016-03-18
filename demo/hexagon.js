@@ -10,6 +10,13 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     var hexagonDOM;
     var hexagon;
 
+    // paths
+    var pathLines = {
+        1: null,
+        2: null,
+        3: null
+    };
+
 
     //====== Public Methods ===============
 
@@ -39,16 +46,30 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
             return drawLine(edge2, edge1);
         }
 
-        if (Math.abs(edge1 - edge2) === 3) {
-            drawLine(edge1, edge2)
+        if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] === null) {
+            var line = drawLine(edge1, edge2);
+            pathLines[edge1] = line;
         } else {
-            console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2)
+            console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2);
         }
     };
 
+    var removePath = function(edge1, edge2) {
+        if (edge1 > edge2) {
+            return removeEdge(edge2, edge1);
+        }
+
+        if (Math.abs(edge1 - edge2) === 3) {
+            two.remove(pathLines[edge1]);
+            pathLines[edge1] = null;
+        } else {
+            console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
+        }
+    }
+
     var remove = function(two){
         two.remove(hexagon);
-    }
+    };
 
     //====== Private Methods ==============
 
@@ -73,12 +94,14 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
         var line = two.makePath(x1, y1, x2, y2, true);
         two.update();
+
+        return line;
     }
 
     //====== Initialization ===============
     var init = (function() {
         // Create hexagon
-        var hexagon = two.makePolygon(xCenter, yCenter, radius, 6);
+        hexagon = two.makePolygon(xCenter, yCenter, radius, 6);
         hexagon.fill = '#eeeeee';
         hexagon.stroke = '#aaaaaa';
         hexagon.linewidth = 1;
@@ -94,6 +117,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         hoverMode: hoverMode,
         clickedMode: clickedMode,
         drawPath: drawPath,
+        removePath: removePath,
         remove: remove
     };
 }
