@@ -63,6 +63,11 @@ $(document).ready(function() {
 
             } else {
                 selected_item = null;
+                if (mouse !== null){
+                        mouse.remove(two);
+                        two.update();
+                        mouse = null;
+                }
                 $(this).removeClass('clicked');
                 $("#drawCanvas").unbind('mousemove');
             }
