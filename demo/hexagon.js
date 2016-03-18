@@ -3,11 +3,12 @@
  * 
  * TODO: does it also include manipulation such as update()? who knows...
  */
-var Hexagon = function(two, x, y, radius) {
+var Hexagon = function(two, xCenter, yCenter, radius) {
 
     // Instance variables
     var hexagonId;
     var hexagonDOM;
+
 
     //====== Public Methods ===============
 
@@ -32,12 +33,47 @@ var Hexagon = function(two, x, y, radius) {
         }
     };
 
+    var drawPath = function(edge1, edge2) {
+        if (edge1 > edge2) {
+            return drawLine(edge2, edge1);
+        }
+
+        if (Math.abs(edge1 - edge2) === 3) {
+            drawLine(edge1, edge2)
+        } else {
+            console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2)
+        }
+    };
+
     //====== Private Methods ==============
+
+    var drawLine = function(edge1, edge2) {
+        var dx;
+        var dy;
+        if (edge1 === 1) {
+            dx = -radius*Math.sqrt(3)/4;
+            dy = -radius*0.75
+        } else if (edge1 === 2) {
+            dx = radius*Math.sqrt(3)/4;
+            dy = -radius*0.75;
+        } else {
+            dx = radius*Math.sqrt(3)/2;
+            dy = 0;
+        }
+
+        var x1 = xCenter + dx;
+        var y1 = yCenter + dy;
+        var x2 = xCenter - dx;
+        var y2 = yCenter - dy;
+
+        var line = two.makePath(x1, y1, x2, y2, true);
+        two.update();
+    }
 
     //====== Initialization ===============
     var init = (function() {
         // Create hexagon
-        var hexagon = two.makePolygon(x, y, radius, 6);
+        var hexagon = two.makePolygon(xCenter, yCenter, radius, 6);
         hexagon.fill = '#eeeeee';
         hexagon.stroke = '#aaaaaa';
         hexagon.linewidth = 1;
@@ -52,6 +88,7 @@ var Hexagon = function(two, x, y, radius) {
     return {
         getId: getId,
         hoverMode: hoverMode,
-        clickedMode: clickedMode
-    }
+        clickedMode: clickedMode,
+        drawPath: drawPath
+    };
 }

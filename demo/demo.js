@@ -24,11 +24,15 @@ $(document).ready(function() {
 
         hexagonDOM.on('click', function() {
             var id = $(this).attr('id');
-            if (id !== selected_hex){
+            if (id !== selected_hex) {
                 if (selected_hex !== null)
                     hexagonMap[selected_hex].clickedMode(false);
                 selected_hex = id;
                 hexagonMap[id].clickedMode(true);
+                //hexagonMap[id].drawPath(3, 6);
+            } else {
+                hexagonMap[selected_hex].clickedMode(false);
+                selected_hex = null;
             }
         });
     }
