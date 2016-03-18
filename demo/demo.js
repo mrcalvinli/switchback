@@ -6,8 +6,8 @@ $(document).ready(function() {
     var horizontalDistance = RADIUS * Math.sqrt(3)/2.0;
 
     var elem = document.getElementById('drawCanvas');
-    var params = {width: (NUM_HORIZONTAL_HEX-1)*2*horizontalDistance, 
-                  height: (NUM_VERTICAL_HEX-1)*1.5*RADIUS};
+    var params = {width: (NUM_HORIZONTAL_HEX-.5)*2*horizontalDistance, 
+                  height: (NUM_VERTICAL_HEX-.5)*1.5*RADIUS};
     var two = new Two(params).appendTo(elem);
     var elem2 = document.getElementById('track-menu');
     var params2 = {width: 300, height: 500};
@@ -71,7 +71,7 @@ $(document).ready(function() {
     populateMenu();
 
     var hexagonMap = {};
-    for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
+    for (var i = 0; i <= NUM_VERTICAL_HEX; i++) {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
             var x = 2*j*horizontalDistance + (i % 2) * horizontalDistance;
             var y = 1.5*i*RADIUS;
