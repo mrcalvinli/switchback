@@ -1,15 +1,23 @@
 $(document).ready(function() {
-    var elem = document.getElementById('drawCanvas');
-    var params = {width: 700, height: 700};
-    var two = new Two(params).appendTo(elem);
 
     var RADIUS = 30;
-    var NUM_HORIZONTAL_HEX = 10;
-    var NUM_VERTICAL_HEX = 10;
+    var NUM_HORIZONTAL_HEX = 14;
+    var NUM_VERTICAL_HEX = 16;
+    var horizontalDistance = RADIUS * Math.sqrt(3)/2.0;
+
+    var elem = document.getElementById('drawCanvas');
+    var params = {width: (NUM_HORIZONTAL_HEX-1)*2*horizontalDistance, 
+                  height: (NUM_VERTICAL_HEX-1)*1.5*RADIUS};
+    var two = new Two(params).appendTo(elem);
+    var elem2 = document.getElementById('track-menu');
+    var params2 = {width: 300, height: 500};
+    var menuTwo = new Two(params2).appendTo(elem2);
+
+    
     var selected_hex = null;
     var selected_item = null;
 
-    var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
+    
 
     /**
      * Adding event handlers to hexagon
@@ -56,15 +64,17 @@ $(document).ready(function() {
                 $(this).removeClass('clicked');
             }
         });
+        var straight = $("#menu-item-straight");
+        var hexagon = Hexagon(menuTwo, straight.position().left, straight.position().top, RADIUS)
     }
 
-populateMenu();
+    populateMenu();
 
     var hexagonMap = {};
     for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
-            var x = horizontalDistance + 2*j*horizontalDistance + (i % 2) * horizontalDistance;
-            var y = RADIUS + 1.5*i*RADIUS;
+            var x = 2*j*horizontalDistance + (i % 2) * horizontalDistance;
+            var y = 1.5*i*RADIUS;
             var hexagon = Hexagon(two, x, y, RADIUS)
 
             addHexagonEventHandlers(hexagon);
