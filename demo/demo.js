@@ -7,6 +7,7 @@ $(document).ready(function() {
     var NUM_HORIZONTAL_HEX = 10;
     var NUM_VERTICAL_HEX = 10;
     var selected_hex = null;
+    var selected_item = null;
 
     var horizontalDistance = RADIUS * Math.sqrt(3)/2.0
 
@@ -33,6 +34,32 @@ $(document).ready(function() {
         });
     }
 
+    function populateMenu() {
+        var tracks = $("#tracks");
+        var trains = $("#trains");
+        tracks.append("<div class='item' id='menu-item-straight'></div>");
+        tracks.append("<div class='item' id='menu-item-curved'></div>");
+        trains.append("<div class='item' id='menu-item-gold'></div>");
+        trains.append("<div class='item' id='menu-item-blue'></div>");
+        $(".item").on('click', function() {
+            var id = $(this).attr('id');
+            console.log(id);
+            if (id !== selected_item){
+                if (selected_item !== null) {
+                    $("#"+selected_item+".item").removeClass('clicked');
+                }
+                selected_item = id;
+                $(this).addClass('clicked');
+
+            } else {
+                selected_item = null;
+                $(this).removeClass('clicked');
+            }
+        });
+    }
+
+populateMenu();
+
     var hexagonMap = {};
     for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
@@ -46,6 +73,7 @@ $(document).ready(function() {
         }
     }
 });
+
 
 /*
 makeHexagon(200, 500);
