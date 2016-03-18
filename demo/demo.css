@@ -45,6 +45,7 @@ body {
     margin-left: 6px;
     margin-right: 6px;
     text-align: center;
+    vertical-align: top;
 }
 
 .menu-header {

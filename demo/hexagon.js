@@ -8,6 +8,7 @@ var Hexagon = function(two, x, y, radius) {
     // Instance variables
     var hexagonId;
     var hexagonDOM;
+    var hexagon;
 
     //====== Public Methods ===============
 
@@ -32,18 +33,21 @@ var Hexagon = function(two, x, y, radius) {
         }
     };
 
+    var remove = function(two){
+        two.remove(hexagon);
+    }
+
     //====== Private Methods ==============
 
     //====== Initialization ===============
     var init = (function() {
         // Create hexagon
-        var hexagon = two.makePolygon(x, y, radius, 6);
+        hexagon = two.makePolygon(x, y, radius, 6);
         hexagon.fill = '#eeeeee';
         hexagon.stroke = '#aaaaaa';
         hexagon.linewidth = 1;
         hexagon.rotation = Math.PI / 6;
         two.update();
-
         // Instantiate instance variables
         hexagonId = hexagon.id;
         hexagonDOM = $("#" + hexagonId);
@@ -52,6 +56,7 @@ var Hexagon = function(two, x, y, radius) {
     return {
         getId: getId,
         hoverMode: hoverMode,
-        clickedMode: clickedMode
+        clickedMode: clickedMode,
+        remove: remove
     }
 }
