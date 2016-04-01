@@ -50,6 +50,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     }
 
     var drawPath = function(edge1, edge2) {
+        if (edge1 === edge2) {
+            return;
+        }
         if (edge1 > edge2) {
             return drawPath(edge2, edge1);
         }
@@ -61,6 +64,8 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
             var line = drawLine(edge1, edge2);
             pathLines[edge1] = line;
+        } else if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
+            var arc = drawArc(edge1, edge2);
         } else {
             console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2);
         }
@@ -109,28 +114,29 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     //====== Private Methods ==============
 
     var drawLine = function(edge1, edge2) {
-        var dx;
-        var dy;
-        if (edge1 === 1) {
-            dx = -radius*Math.sqrt(3)/4;
-            dy = -radius*0.75
-        } else if (edge1 === 2) {
-            dx = radius*Math.sqrt(3)/4;
-            dy = -radius*0.75;
-        } else {
-            dx = radius*Math.sqrt(3)/2;
-            dy = 0;
-        }
+        var edgeCenter1 = getSideCoord(edge1);
+        var edgeCenter2 = getSideCoord(edge2);
 
-        var x1 = xCenter + dx;
-        var y1 = yCenter + dy;
-        var x2 = xCenter - dx;
-        var y2 = yCenter - dy;
-
-        var line = two.makePath(x1, y1, x2, y2, true);
+        var line = two.makePath(edgeCenter1.x, edgeCenter1.y, edgeCenter2.x, edgeCenter2.y, true);
         two.update();
 
         return line;
+    }
+
+    var drawArc = function(edge1, edge2) {
+        
+    }
+
+    var getSideCoord = function(edgeIndex) {
+        var angleFromCenter = ((240 + (edgeIndex - 1)*60) % 360) * Math.PI/180.0
+        var distToEdge = radius*Math.sqrt(3)/2.0;
+        var dx = distToEdge * Math.cos(angleFromCenter);
+        var dy = distToEdge * Math.sin(angleFromCenter);
+
+        return {
+            x: xCenter + dx,
+            y: yCenter + dy
+        }
     }
 
     //====== Initialization ===============
