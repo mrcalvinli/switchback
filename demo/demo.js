@@ -117,8 +117,8 @@ $(document).ready(function() {
                     if (selected_item !== null){
                         $("#drawCanvas").unbind("mousemove");
                         $("#drawCanvas").bind("mousemove", function(e){
-                            var dy = hexagonMap[id].getPosition().y - e.clientY;
-                            var dx = hexagonMap[id].getPosition().x - e.clientX;
+                            var dy = mouse.getPosition().y - e.clientY;
+                            var dx = e.clientX - mouse.getPosition().x;
                             var theta = Math.atan2(dy,dx) * 180/Math.PI;
 
                             mouse.removeLines();
@@ -145,7 +145,7 @@ $(document).ready(function() {
                                 //mouse.removeLines();
                                 mouse.drawPath(6,3);
                             }
-                            mouse.removeLines();
+                            //mouse.removeLines();
                         });
                     }
                 });

@@ -50,9 +50,8 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     }
 
     var drawPath = function(edge1, edge2) {
-        
         if (edge1 > edge2) {
-            return drawLine(edge2, edge1);
+            return drawPath(edge2, edge1);
         }
 
         if (doesPathExist(edge1,edge2)){
@@ -72,11 +71,11 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
             return removePath(edge2, edge1);
         }
 
-        if (Math.abs(edge1 - edge2) === 3) {
+        if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null) {
             two.remove(pathLines[edge1]);
             pathLines[edge1] = null;
         } else {
-            console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
+            //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
         }
     }
 
@@ -110,7 +109,6 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     //====== Private Methods ==============
 
     var drawLine = function(edge1, edge2) {
-        console.log("drawing");
         var dx;
         var dy;
         if (edge1 === 1) {
