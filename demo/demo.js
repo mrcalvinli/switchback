@@ -13,6 +13,13 @@ $(document).ready(function() {
     var selected_item = null;
     var mouse = null;
 
+    var getHexCenter = function(xIndex, yIndex) {
+        return {
+            x: 2*xIndex*horizontalDistance + (yIndex % 2) * horizontalDistance,
+            y: 1.5*yIndex*RADIUS
+        }
+    }
+
     var getHexFromPos = function(x,y){
         console.log(x+", "+y);
         var num = Math.floor(y/(1.5*RADIUS))*NUM_HORIZONTAL_HEX+
@@ -23,7 +30,33 @@ $(document).ready(function() {
         return hex;
     }
 
-    
+    var getHexObjFromPos = function(x, y) {
+        var leftHexIndexY = Math.floor(y/(RADIUS*1.5));
+        var leftHexIndexX = Math.floor((x - (leftHexIndexY % 2)*horizontalDistance)/(2*horizontalDistance));
+
+        var leftHexIndex = [leftHexIndexX, leftHexIndexY];
+        var rightHexIndex = [leftHexIndexX + 1, leftHexIndexY];
+        var bottomHexIndex = [leftHexIndexX + leftHexIndexY % 2, leftHexIndexY + 1];
+
+        var hexIndexArray = [leftHexIndex, rightHexIndex, bottomHexIndex];
+        var closestHexIndex = undefined;
+        var shortestDistance = 10000;
+        for (var i = 0; i < hexIndexArray.length; i++) {
+            var hexIndexX = hexIndexArray[i][0];
+            var hexIndexY = hexIndexArray[i][1];
+            var hexCenter = getHexCenter(hexIndexX, hexIndexY);
+
+            var distance = Math.sqrt(Math.pow(x - hexCenter.x, 2) + Math.pow(y - hexCenter.y, 2));
+
+            if (distance < shortestDistance) {
+                closestHexIndex = hexIndexArray[i];
+                shortestDistance = distance;
+            }
+        }
+
+        var hexId = closestHexIndex[0] + closestHexIndex[1]*NUM_HORIZONTAL_HEX + 9;
+        return hexagonMap['two_'+hexId];
+    }    
 
     /**
      * Adding event handlers to hexagon
@@ -166,9 +199,8 @@ $(document).ready(function() {
     var hexagonMap = {};
     for (var i = 0; i <= NUM_VERTICAL_HEX; i++) {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
-            var x = 2*j*horizontalDistance + (i % 2) * horizontalDistance;
-            var y = 1.5*i*RADIUS;
-            var hexagon = Hexagon(two, x, y, RADIUS)
+            var center = getHexCenter(j, i);
+            var hexagon = Hexagon(two, center.x, center.y, RADIUS)
 
             addHexagonEventHandlers(hexagon);
 
