@@ -77,10 +77,10 @@ $(document).ready(function() {
                     hexagonMap[selected_hex].clickedMode(false);
                 selected_hex = id;
                 hexagonMap[id].clickedMode(true);
-                hexagonMap[id].drawPath(3, 6);
+                //hexagonMap[id].drawPath(3, 6);
             } else {
                 hexagonMap[selected_hex].clickedMode(false);
-                hexagonMap[selected_hex].removePath(3, 6);
+                hexagonMap[selected_hex].removeLines();
                 selected_hex = null;
             }
             two.update();
@@ -107,13 +107,17 @@ $(document).ready(function() {
                     if (mouse !== null)
                         mouse.remove();
                     mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                    mouse.drawPath(1,4);
+                    mouse.draw(selected_item, 120);
                     console.log("hi");
                     mouse.setFill("rgba(0,0,0,0)");
                     two.update();
                 });
                 $("#drawCanvas").on('mousedown', function(e) {
                     var id = getHexFromPos(e.clientX,e.clientY).attr('id');
+                    if (id !== selected_hex){
+                        $('#'+id).click();
+                    }
+                    //mouse.setPosition(hexagonMap[id].x,hexagonMap[id].y);
                     if (selected_item !== null){
                         $("#drawCanvas").unbind("mousemove");
                         $("#drawCanvas").bind("mousemove", function(e){
@@ -122,41 +126,23 @@ $(document).ready(function() {
                             var theta = Math.atan2(dy,dx) * 180/Math.PI;
 
                             mouse.removeLines();
-                            if (theta > 90 && theta <= 150){
-                                //mouse.removeLines();
-                                mouse.drawPath(1,4);
-                            }
-                            else if (theta <= 90 && theta > 30){
-                                //mouse.removeLines();
-                                mouse.drawPath(2,5);
-                            }
-                            else if (theta <= 30 && theta > -30){
-                                //mouse.removeLines();
-                                mouse.drawPath(3,6);
-                            }
-                            else if (theta <= -30 && theta > -90){
-                                //mouse.removeLines();
-                                mouse.drawPath(4,1);
-                            }
-                            else if (theta <= -90 && theta > -150){
-                                //mouse.removeLines();
-                                mouse.drawPath(5,2);
-                            } else {
-                                //mouse.removeLines();
-                                mouse.drawPath(6,3);
-                            }
+                            mouse.draw(selected_item,theta);
                             //mouse.removeLines();
                         });
                     }
                 });
                 $("#drawCanvas").on('mouseup', function(e) {
                     mouse.removeLines();
+                    var dy = mouse.getPosition().y - e.clientY;
+                    var dx = e.clientX - mouse.getPosition().x;
+                    var theta = Math.atan2(dy,dx) * 180/Math.PI;
+                    hexagonMap[selected_hex].draw(selected_item,theta);
                     $("#drawCanvas").unbind("mousemove");
                     $("#drawCanvas").bind("mousemove", function(e){
                         if (mouse !== null)
                             mouse.remove();
                         mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                        mouse.drawPath(1,4);
+                        mouse.draw(selected_item, 120);
                         mouse.setFill("rgba(0,0,0,0)");
                         two.update();
                     });
@@ -171,15 +157,19 @@ $(document).ready(function() {
                 }
                 $(this).removeClass('clicked');
                 $("#drawCanvas").unbind('mousemove');
+                $("#drawCanvas").unbind('mousedown');
+                $("#drawCanvas").unbind('mouseup');
             }
         });
         var straight = $("#menu-item-straight");
         var item_params = {width: 66, height: 66};
         var straightTwo = new Two(item_params).appendTo(straight[0]);
         var hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
+        hexagon.draw("menu-item-straight", 120);
         var curve = $("#menu-item-curved");
         straightTwo = new Two(item_params).appendTo(curve[0]);
         hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
+        hexagon.draw("menu-item-curved", 120);
 
         var gold = $("#menu-item-gold");
         var goldTwo = new Two(item_params).appendTo(gold[0]);
