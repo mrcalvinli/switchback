@@ -54,7 +54,8 @@ $(document).ready(function() {
             }
         }
 
-        var hexId = closestHexIndex[0] + closestHexIndex[1]*NUM_HORIZONTAL_HEX + 9;
+        var hexId = closestHexIndex[0] + closestHexIndex[1]*NUM_HORIZONTAL_HEX + 11;
+        //console.log(hexId);
         return hexagonMap['two_'+hexId];
     }    
 
@@ -113,7 +114,7 @@ $(document).ready(function() {
                     two.update();
                 });
                 $("#drawCanvas").on('mousedown', function(e) {
-                    var id = getHexFromPos(e.clientX,e.clientY).attr('id');
+                    var id = getHexObjFromPos(e.clientX,e.clientY).getId();
                     if (id !== selected_hex){
                         $('#'+id).click();
                     }
@@ -142,7 +143,7 @@ $(document).ready(function() {
                         if (mouse !== null)
                             mouse.remove();
                         mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                        mouse.draw(selected_item, 120);
+                        mouse.draw(selected_item, 0);
                         mouse.setFill("rgba(0,0,0,0)");
                         two.update();
                     });
@@ -165,11 +166,11 @@ $(document).ready(function() {
         var item_params = {width: 66, height: 66};
         var straightTwo = new Two(item_params).appendTo(straight[0]);
         var hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw("menu-item-straight", 120);
+        hexagon.draw("menu-item-straight", 0);
         var curve = $("#menu-item-curved");
         straightTwo = new Two(item_params).appendTo(curve[0]);
         hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw("menu-item-curved", 120);
+        hexagon.draw("menu-item-curved", 0);
 
         var gold = $("#menu-item-gold");
         var goldTwo = new Two(item_params).appendTo(gold[0]);

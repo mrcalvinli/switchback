@@ -140,6 +140,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
 
     var draw = function(type, theta){
+        console.log("theta: "+theta);
         var e1 = 1;
         if (theta > 90 && theta <= 150){
             e1 = 1; 
@@ -212,7 +213,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         var anchor1 = new Two.Anchor(edgeCenter1.x, edgeCenter1.y, 0, 0, 
             .75*(xCenter - edgeCenter1.x), .75*(yCenter - edgeCenter1.y), Two.Commands.curve);
         var anchor2 = new Two.Anchor(edgeCenter2.x, edgeCenter2.y, 
-            (xCenter - edgeCenter2.x)*.75, .75*(edgeCenter2.y - yCenter), 0, 0, Two.Commands.curve);
+            (xCenter - edgeCenter2.x)*.75, .75*(yCenter - edgeCenter2.y), 0, 0, Two.Commands.curve);
 
         var path = two.makeCurve([anchor1, anchor2], true);
        
