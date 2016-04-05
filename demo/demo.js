@@ -118,6 +118,10 @@ $(document).ready(function() {
                             var theta = Math.atan2(dy,dx) * 180/Math.PI;
 
                             mouse.removeLines();
+                            mouse.removeTrain();
+                            if (selected_item === "menu-item-gold"){
+                                mouse.draw("menu-item-straight",theta);
+                            }
                             mouse.draw(selected_item,theta);
                             //mouse.removeLines();
                         });
@@ -134,6 +138,9 @@ $(document).ready(function() {
                         if (mouse !== null)
                             mouse.remove();
                         mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
+                        if (selected_item === "menu-item-gold"){
+                            mouse.draw("menu-item-straight",0);
+                        }
                         mouse.draw(selected_item, 0);
                         mouse.setFill("rgba(0,0,0,0)");
                         two.update();

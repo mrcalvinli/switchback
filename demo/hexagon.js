@@ -60,6 +60,10 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         return (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null);
     }
 
+    var doesArcExist = function(edge1) {
+        return arcLines[edge1] !== null
+    }
+
     var drawPath = function(edge1, edge2) {
         if (edge1 === edge2) {
             return;
@@ -103,10 +107,14 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
     };
 
+    var removeTrain = function(){
+        two.remove(train);
+    }
+
     var remove = function(){
         two.remove(hexagon)
         removeLines();
-        two.remove(train);
+        removeTrain();
         two.update();
 
     };
@@ -171,8 +179,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
             drawArc(e1, e2);
         }
         else if (type === "menu-item-gold"){
-            if (pathLines[e1] !== null){
-                drawTrain(pathLines[e1]);
+            var e2 = (e1 +2)%6+1;
+            if (doesPathExist(e1, e2)){
+                drawTrain(Math.min(e1,e2));
             }
         }
         else if (type === "menu-item-blue"){
@@ -196,11 +205,8 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         if (edge1 === edge2) {
             return;
         }
-        if (edge1 > edge2) {
-            return drawArc(edge2, edge1);
-        }
 
-        if (doesPathExist(edge1,edge2)){
+        if (doesArcExist(edge1)){
             return;
         }
         if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
@@ -211,11 +217,12 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
     }
 
-    var drawTrain = function(path){
-        var theta = path.rotation;
+    var drawTrain = function(e1){
+        var theta = getSideCoord(e1).theta;
         train = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
         train.rotation = theta;
         train.fill = "gold";
+        two.update();
     }
 
     var makeArc = function(edge1, edge2) {
@@ -244,7 +251,8 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
         return {
             x: xCenter + dx,
-            y: yCenter + dy
+            y: yCenter + dy,
+            theta: angleFromCenter
         }
     }
 
@@ -272,6 +280,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         removePath: removePath,
         remove: remove,
         removeLines: removeLines,
+        removeTrain: removeTrain,
         getPosition: getPosition,
         setPosition: setPosition,
         setFill: setFill,
