@@ -4,6 +4,7 @@ $(document).ready(function() {
     var NUM_HORIZONTAL_HEX = 14;
     var NUM_VERTICAL_HEX = 16;
     var horizontalDistance = RADIUS * Math.sqrt(3)/2.0;
+    var firstHex = 0;
 
     var elem = document.getElementById('drawCanvas');
     var params = {width: (NUM_HORIZONTAL_HEX-.5)*2*horizontalDistance, 
@@ -18,16 +19,6 @@ $(document).ready(function() {
             x: 2*xIndex*horizontalDistance + (yIndex % 2) * horizontalDistance,
             y: 1.5*yIndex*RADIUS
         }
-    }
-
-    var getHexFromPos = function(x,y){
-        console.log(x+", "+y);
-        var num = Math.floor(y/(1.5*RADIUS))*NUM_HORIZONTAL_HEX+
-                  Math.floor(x/(2*horizontalDistance))+9;
-        console.log(Math.floor(y/(1.5*RADIUS))+", "+Math.floor(x/(2*horizontalDistance)));
-        var hex = $('#drawCanvas').find('#two_'+num);
-        console.log(hex);
-        return hex;
     }
 
     var getHexObjFromPos = function(x, y) {
@@ -53,9 +44,7 @@ $(document).ready(function() {
                 shortestDistance = distance;
             }
         }
-
-        var hexId = closestHexIndex[0] + closestHexIndex[1]*NUM_HORIZONTAL_HEX + 11;
-        //console.log(hexId);
+        var hexId = closestHexIndex[0] + closestHexIndex[1]*NUM_HORIZONTAL_HEX + firstHex;
         return hexagonMap['two_'+hexId];
     }    
 
@@ -112,7 +101,6 @@ $(document).ready(function() {
                         mouse.draw("menu-item-straight",0);
                     }
                     mouse.draw(selected_item, 0);
-                    console.log("hi");
                     mouse.setFill("rgba(0,0,0,0)");
                     two.update();
                 });
@@ -194,9 +182,12 @@ $(document).ready(function() {
     var hexagonMap = {};
     for (var i = 0; i <= NUM_VERTICAL_HEX; i++) {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
+
             var center = getHexCenter(j, i);
             var hexagon = Hexagon(two, center.x, center.y, RADIUS)
-
+            if(i === 0 && j === 0){
+                firstHex = Number(hexagon.getId().substring(4));
+            }
             addHexagonEventHandlers(hexagon);
 
             hexagonMap[hexagon.getId()] = hexagon;

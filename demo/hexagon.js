@@ -144,7 +144,6 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
 
     var draw = function(type, theta){
-        console.log("theta: "+theta);
         var e1 = 1;
         if (theta > 90 && theta <= 150){
             e1 = 1; 
