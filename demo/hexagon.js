@@ -26,6 +26,8 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         6: null
     };
 
+    var train = null;
+
 
     //====== Public Methods ===============
 
@@ -104,7 +106,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     var remove = function(){
         two.remove(hexagon)
         removeLines();
+        two.remove(train);
         two.update();
+
     };
 
     var removeLines = function(){
@@ -168,7 +172,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
             drawArc(e1, e2);
         }
         else if (type === "menu-item-gold"){
-            drawTrain(e1,e2);
+            if (pathLines[e1] !== null){
+                drawTrain(pathLines[e1]);
+            }
         }
         else if (type === "menu-item-blue"){
             drawTrain(1,e2);
@@ -204,6 +210,13 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         } else {
             console.log('Unable to draw such arc now from edge ' + edge1 + ' to ' + edge2);
         }
+    }
+
+    var drawTrain = function(path){
+        var theta = path.rotation;
+        train = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
+        train.rotation = theta;
+        train.fill = "gold";
     }
 
     var makeArc = function(edge1, edge2) {

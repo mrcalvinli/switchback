@@ -108,7 +108,10 @@ $(document).ready(function() {
                     if (mouse !== null)
                         mouse.remove();
                     mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                    mouse.draw(selected_item, 120);
+                    if (selected_item === "menu-item-gold"){
+                        mouse.draw("menu-item-straight",0);
+                    }
+                    mouse.draw(selected_item, 0);
                     console.log("hi");
                     mouse.setFill("rgba(0,0,0,0)");
                     two.update();
@@ -174,8 +177,9 @@ $(document).ready(function() {
 
         var gold = $("#menu-item-gold");
         var goldTwo = new Two(item_params).appendTo(gold[0]);
-        var goldRect = goldTwo.makeRoundedRectangle(66/2, 66/2, 40, 20, 3);
-        goldRect.fill = "gold";
+        hexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
+        hexagon.draw("menu-item-straight", 0);
+        hexagon.draw("menu-item-gold", 0);
         goldTwo.update();
 
         var blue = $("#menu-item-blue");
