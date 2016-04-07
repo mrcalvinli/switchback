@@ -239,19 +239,12 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         var rect = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
 
 
-        var beg = edge.getPointAt(0).addSelf(edge.translation);
-        var end = edge.getPointAt(.99).addSelf(edge.translation);
+        var deriv = calcDerivAt(edge,0.5);
 
-        //console.log(beg);
-
-        var dy = end.y - beg.y;
-        var dx = end.x - beg.x;
-
-        rect.rotation = Math.atan2(dy,dx);
+        rect.rotation = Math.atan2(deriv.dy, deriv.dx);
         rect.fill = "gold";
 
-        edge.getPointAt(.5, rect.translation);
-        rect.translation.addSelf(edge.translation);
+        translateOnCurve(edge, 0.5, rect);
 
         if (train.train !== null){
             removeTrain(); 
@@ -263,6 +256,19 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
         //train.edge = e1;
         two.update();
+    }
+
+    var translateOnCurve = function(path, t, obj) {
+        path.getPointAt(t, obj.translation);
+        obj.translation.addSelf(path.translation);
+    }
+
+    var calcDerivAt = function(path, t) {
+        var beg = path.getPointAt(t-.01).addSelf(path.translation);
+        var end = path.getPointAt(t+.01).addSelf(path.translation);
+        var delty = end.y - beg.y;
+        var deltx = end.x - beg.x;
+        return {dx:deltx, dy:delty};
     }
 
     var makeArc = function(edge1, edge2) {
