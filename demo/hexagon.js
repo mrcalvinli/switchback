@@ -26,11 +26,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         6: null
     };
 
-    var train = {
-        track: null,
-        edge: null,
-        train: null,
-    };
+    var train = null;
 
 
     //====== Public Methods ===============
@@ -97,7 +93,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
         else if (type === "menu-item-gold"){
             if (edge != null){
-                drawTrain(edge);
+                drawTrain(edge, "gold");
             }
         }
         else if (type === "menu-item-blue"){
@@ -119,7 +115,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] === null) {
 
             var line = drawLine(edge1, edge2);
-            pathLines[edge1] = line;
+            pathLines[edge1] =  Path(two,line,edge1,edge2);
         } else if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
             var arc = drawArc(edge1, edge2);
         } else {
@@ -146,7 +142,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
 
         if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null) {
-            two.remove(pathLines[edge1]);
+            pathLines[edge1].remove();
             pathLines[edge1] = null;
         } else {
             //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
@@ -154,7 +150,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
     var removeArc = function(edge1) {
         if (arcLines[edge1] !== null) {
-            two.remove(arcLines[edge1]);
+            arcLines[edge1].remove();
             arcLines[edge1] = null;
         } else {
             //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
@@ -162,9 +158,13 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
 
     var removeTrain = function(){
-        two.remove(train.train);
-        train.train = null;
-        train.track = null;
+        if (train !== null){
+            train.remove();
+            train = null;
+        }
+        else {
+            console.log("unable to remove train, reference is null");
+        }
     }
 
     var remove = function(){
@@ -176,9 +176,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
 
     var removeLines = function(){
-        removePath(1,4);
-        removePath(3,6);
-        removePath(2,5);
+        for (var i =1; i<=3;i++){
+            removePath(i,i+3);
+        }
         for (var i =1; i<=6;i++){
             removeArc(i);
         }
@@ -187,14 +187,6 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
     var getPosition = function(){
         return {x: xCenter, y: yCenter};
-    };
-
-    var setPosition = function(x, y){
-        var dx = x - xCenter;
-        var dy = y - yCenter;
-        xCenter = x;
-        yCenter = y;
-        hexagon.target.set(x,y);
     };
 
     var setFill = function(fill){
@@ -229,28 +221,14 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
         if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
             var arc = makeArc(edge1, edge2);
-            arcLines[edge1] = arc;
+            arcLines[edge1] = Path(two,arc,edge1,edge2);
         } else {
             console.log('Unable to draw such arc now from edge ' + edge1 + ' to ' + edge2);
         }
     }
 
-    var drawTrain = function(edge){
-        var rect = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
-
-
-        var deriv = calcDerivAt(edge,0.5);
-
-        rect.rotation = Math.atan2(deriv.dy, deriv.dx);
-        rect.fill = "gold";
-
-        translateOnCurve(edge, 0.5, rect);
-
-        if (train.train !== null){
-            removeTrain(); 
-        }
-        train.train = rect;
-        train.track = edge;
+    var drawTrain = function(edge, color){
+        train = Train(two,edge,color,true);
         //console.log(arcLines[e1].getPointAt(0.5));
         //console.log(pathLines[e1].translation);
 
@@ -329,7 +307,6 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         removeLines: removeLines,
         removeTrain: removeTrain,
         getPosition: getPosition,
-        setPosition: setPosition,
         setFill: setFill,
         rotate: rotate
     };
