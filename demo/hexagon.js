@@ -26,7 +26,11 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         6: null
     };
 
-    var train = null;
+    var train = {
+        track: null,
+        edge: null,
+        train: null,
+    };
 
 
     //====== Public Methods ===============
@@ -64,6 +68,43 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         return arcLines[edge1] !== null
     }
 
+    var draw = function(type, theta, edge){
+        var e1 = 1;
+        if (theta > 90 && theta <= 150){
+            e1 = 1; 
+        }
+        else if (theta <= 90 && theta > 30){
+            e1 = 2; 
+        }
+        else if (theta <= 30 && theta > -30){
+            e1 = 3; 
+        }
+        else if (theta <= -30 && theta > -90){
+            e1 = 4; 
+        }
+        else if (theta <= -90 && theta > -150){
+            e1 = 5; 
+        } else {
+            e1 = 6; 
+        }
+        if (type === "menu-item-straight"){
+            var e2 = (e1 +2)%6+1;
+            drawPath(e1,e2);
+        }
+        else if (type === "menu-item-curved"){
+            var e2 = (e1+1)%6+1;
+            drawArc(e1, e2);
+        }
+        else if (type === "menu-item-gold"){
+            if (edge != null){
+                drawTrain(edge);
+            }
+        }
+        else if (type === "menu-item-blue"){
+            drawTrain(1,e2);
+        }
+    }
+
     var drawPath = function(edge1, edge2) {
         if (edge1 === edge2) {
             return;
@@ -85,6 +126,19 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
             console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2);
         }
     };
+
+    var getTracks = function(){
+        var tracks = [];
+        for (var i = 1; i <= 3; i++){
+            if (pathLines[i] !== null)
+                tracks.push(pathLines[i]);
+        }
+        for (var i = 1; i <= 6; i++){
+            if (arcLines[i] !== null)
+                tracks.push(arcLines[i]);
+        }
+        return tracks;
+    }
 
     var removePath = function(edge1, edge2) {
         if (edge1 > edge2) {
@@ -108,7 +162,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     };
 
     var removeTrain = function(){
-        two.remove(train);
+        two.remove(train.train);
+        train.train = null;
+        train.track = null;
     }
 
     var remove = function(){
@@ -151,44 +207,6 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         two.update();
     };
 
-    var draw = function(type, theta){
-        var e1 = 1;
-        if (theta > 90 && theta <= 150){
-            e1 = 1; 
-        }
-        else if (theta <= 90 && theta > 30){
-            e1 = 2; 
-        }
-        else if (theta <= 30 && theta > -30){
-            e1 = 3; 
-        }
-        else if (theta <= -30 && theta > -90){
-            e1 = 4; 
-        }
-        else if (theta <= -90 && theta > -150){
-            e1 = 5; 
-        } else {
-            e1 = 6; 
-        }
-        if (type === "menu-item-straight"){
-            var e2 = (e1 +2)%6+1;
-            drawPath(e1,e2);
-        }
-        else if (type === "menu-item-curved"){
-            var e2 = (e1+1)%6+1;
-            drawArc(e1, e2);
-        }
-        else if (type === "menu-item-gold"){
-            var e2 = (e1 +2)%6+1;
-            if (doesPathExist(e1, e2)){
-                drawTrain(Math.min(e1,e2));
-            }
-        }
-        else if (type === "menu-item-blue"){
-            drawTrain(1,e2);
-        }
-    }
-
     //====== Private Methods ==============
 
     var drawLine = function(edge1, edge2) {
@@ -217,11 +235,33 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         }
     }
 
-    var drawTrain = function(e1){
-        var theta = getSideCoord(e1).theta;
-        train = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
-        train.rotation = theta;
-        train.fill = "gold";
+    var drawTrain = function(edge){
+        var rect = two.makeRoundedRectangle(xCenter, yCenter, 40, 20, 3);
+
+
+        var beg = edge.getPointAt(0).addSelf(edge.translation);
+        var end = edge.getPointAt(.99).addSelf(edge.translation);
+
+        //console.log(beg);
+
+        var dy = end.y - beg.y;
+        var dx = end.x - beg.x;
+
+        rect.rotation = Math.atan2(dy,dx);
+        rect.fill = "gold";
+
+        edge.getPointAt(.5, rect.translation);
+        rect.translation.addSelf(edge.translation);
+
+        if (train.train !== null){
+            removeTrain(); 
+        }
+        train.train = rect;
+        train.track = edge;
+        //console.log(arcLines[e1].getPointAt(0.5));
+        //console.log(pathLines[e1].translation);
+
+        //train.edge = e1;
         two.update();
     }
 
@@ -277,6 +317,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         doesPathExist: doesPathExist,
         draw: draw,
         drawPath: drawPath,
+        getTracks: getTracks,
         removePath: removePath,
         remove: remove,
         removeLines: removeLines,

@@ -99,6 +99,7 @@ $(document).ready(function() {
                     mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
                     if (selected_item === "menu-item-gold"){
                         mouse.draw("menu-item-straight",0);
+                        mouse.draw("menu-item-gold",0,mouse.getTracks()[0]);
                     }
                     mouse.draw(selected_item, 0);
                     mouse.setFill("rgba(0,0,0,0)");
@@ -120,9 +121,14 @@ $(document).ready(function() {
                             mouse.removeLines();
                             mouse.removeTrain();
                             if (selected_item === "menu-item-gold"){
-                                mouse.draw("menu-item-straight",theta);
+                                var tracks = hexagonMap[selected_hex].getTracks();
+                                //console.log(tracks);
+                                var index = Math.floor((theta+179)/(360/tracks.length));
+                                //console.log(index);
+                                mouse.draw("menu-item-gold",theta,tracks[index]);
+                            } else{
+                                mouse.draw(selected_item,theta);
                             }
-                            mouse.draw(selected_item,theta);
                             //mouse.removeLines();
                         });
                     }
@@ -132,7 +138,14 @@ $(document).ready(function() {
                     var dy = mouse.getPosition().y - e.clientY;
                     var dx = e.clientX - mouse.getPosition().x;
                     var theta = Math.atan2(dy,dx) * 180/Math.PI;
-                    hexagonMap[selected_hex].draw(selected_item,theta);
+                    if (selected_item === "menu-item-gold"){
+                        var tracks = hexagonMap[selected_hex].getTracks();
+                        //console.log(tracks);
+                        var index = Math.floor((theta+179)/(360/tracks.length));
+                        hexagonMap[selected_hex].draw("menu-item-gold",theta,tracks[index]);
+                    } else{
+                        hexagonMap[selected_hex].draw(selected_item,theta);
+                    }
                     $("#drawCanvas").unbind("mousemove");
                     $("#drawCanvas").bind("mousemove", function(e){
                         if (mouse !== null)
@@ -140,6 +153,7 @@ $(document).ready(function() {
                         mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
                         if (selected_item === "menu-item-gold"){
                             mouse.draw("menu-item-straight",0);
+                            mouse.draw("menu-item-gold",0,mouse.getTracks()[0]);
                         }
                         mouse.draw(selected_item, 0);
                         mouse.setFill("rgba(0,0,0,0)");
@@ -174,7 +188,7 @@ $(document).ready(function() {
         var goldTwo = new Two(item_params).appendTo(gold[0]);
         hexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
         hexagon.draw("menu-item-straight", 0);
-        hexagon.draw("menu-item-gold", 0);
+        hexagon.draw("menu-item-gold", 0, hexagon.getTracks()[0]);
         goldTwo.update();
 
         var blue = $("#menu-item-blue");
