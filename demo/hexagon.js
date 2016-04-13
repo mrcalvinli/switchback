@@ -3,7 +3,7 @@
  * 
  * TODO: does it also include manipulation such as update()? who knows...
  */
-var Hexagon = function(two, xCenter, yCenter, radius) {
+var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     // Instance variables
     var hexagonId;
@@ -62,6 +62,29 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
 
     var doesArcExist = function(edge1) {
         return arcLines[edge1] !== null
+    }
+
+    var adjacentEdges = function(edge) {
+        var adjacentEdgeList = [];
+
+        // check for straight line paths
+        var oppositeEdge = ((edge + 2) % 6) + 1;
+        if (doesPathExist(edge, oppositeEdge)) {
+            adjacentEdgeList.push(oppositeEdge);
+        }
+
+        // check for arc paths
+        if (doesArcExist(edge)) {
+            var linkedEdge = (edge + 1) % 6 + 1;
+            adjacentEdgeList.push(linkedEdge);
+        }
+
+        var linkedEdge = (edge + 3) % 6 + 1;
+        if (doesArcExist(linkedEdge)) {
+            adjacentEdgeList.push(linkedEdge);
+        }
+
+        return adjacentEdgeList;
     }
 
     var draw = function(type, theta, edge){
@@ -189,6 +212,10 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         return {x: xCenter, y: yCenter};
     };
 
+    var getPositionIndex = function() {
+        return {xIndex: xIndex, yIndex: yIndex}
+    }
+
     var setFill = function(fill){
         hexagon.fill = fill;
         two.update();
@@ -228,6 +255,9 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
     }
 
     var drawTrain = function(edge, color){
+        if (train != null){
+            removeTrain();
+        }
         train = Train(two,edge,color,true);
         //console.log(arcLines[e1].getPointAt(0.5));
         //console.log(pathLines[e1].translation);
@@ -299,6 +329,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         hoverMode: hoverMode,
         clickedMode: clickedMode,
         doesPathExist: doesPathExist,
+        adjacentEdges: adjacentEdges,
         draw: draw,
         drawPath: drawPath,
         getTracks: getTracks,
@@ -307,6 +338,7 @@ var Hexagon = function(two, xCenter, yCenter, radius) {
         removeLines: removeLines,
         removeTrain: removeTrain,
         getPosition: getPosition,
+        getPositionIndex: getPositionIndex,
         setFill: setFill,
         rotate: rotate
     };

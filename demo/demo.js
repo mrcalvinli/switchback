@@ -67,7 +67,6 @@ $(document).ready(function() {
                     hexagonMap[selected_hex].clickedMode(false);
                 selected_hex = id;
                 hexagonMap[id].clickedMode(true);
-                //hexagonMap[id].drawPath(3, 6);
             } else {
                 hexagonMap[selected_hex].clickedMode(false);
                 hexagonMap[selected_hex].removeLines();
@@ -205,7 +204,7 @@ $(document).ready(function() {
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
 
             var center = getHexCenter(j, i);
-            var hexagon = Hexagon(two, center.x, center.y, RADIUS)
+            var hexagon = Hexagon(two, center.x, center.y, RADIUS, j, i)
             if(i === 0 && j === 0){
                 firstHex = Number(hexagon.getId().substring(4));
             }
@@ -214,6 +213,12 @@ $(document).ready(function() {
             hexagonMap[hexagon.getId()] = hexagon;
         }
     }
+
+    // pathfinding = PathFinding(hexagonMap, {
+    //     RADIUS: RADIUS,
+    //     NUM_HORIZONTAL_HEX: NUM_HORIZONTAL_HEX,
+    //     NUM_VERTICAL_HEX: NUM_VERTICAL_HEX
+    // });
 });
 
 
