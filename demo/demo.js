@@ -14,6 +14,19 @@ $(document).ready(function() {
     var selected_item = null;
     var mouse = null;
 
+    var straight = {id: 'menu-item-straight'};
+    var curved = {id: 'menu-item-curved'};
+    var goldItem = {id: 'menu-item-gold',
+                    color: 'gold',
+                    engine: true,
+                    train: true};
+    var blueItem = {id: 'menu-item-blue',
+                    color: 'navy',
+                    engine: true,
+                    train: true};
+    var lineErase = {id: 'menu-item-erase-line'};
+    var trainErase = {id: 'menu-item-erase-train'};
+
     var getHexCenter = function(xIndex, yIndex) {
         return {
             x: 2*xIndex*horizontalDistance + (yIndex % 2) * horizontalDistance,
@@ -69,11 +82,26 @@ $(document).ready(function() {
                 hexagonMap[id].clickedMode(true);
             } else {
                 hexagonMap[selected_hex].clickedMode(false);
-                hexagonMap[selected_hex].removeLines();
+                //hexagonMap[selected_hex].removeLines();
                 selected_hex = null;
             }
             two.update();
         });
+    }
+
+    var setSelectedItem = function(id){
+        if (id === "menu-item-erase-train")
+            selected_item = trainErase;
+        else if (id === "menu-item-straight")
+            selected_item = straight;
+        else if (id === "menu-item-curved")
+            selected_item = curved;
+        else if (id === "menu-item-erase-line")
+            selected_item = lineErase;
+        else if (id === "menu-item-gold")
+            selected_item = goldItem;
+        else if (id === "menu-item-blue")
+            selected_item = blueItem;
     }
 
     function populateMenu() {
@@ -81,27 +109,33 @@ $(document).ready(function() {
         var trains = $("#trains");
         tracks.append("<div class='item' id='menu-item-straight'></div>");
         tracks.append("<div class='item' id='menu-item-curved'></div>");
+        tracks.append("<div class='item' id='menu-item-erase-line'></div>");
         trains.append("<div class='item' id='menu-item-gold'></div>");
         trains.append("<div class='item' id='menu-item-blue'></div>");
+        trains.append("<div class='item' id='menu-item-erase-train'></div>");
         $(".item").on('click', function() {
             var id = $(this).attr('id');
             console.log(id);
-            if (id !== selected_item){
+            if (selected_item === null || id !== selected_item.id){
                 if (selected_item !== null) {
-                    $("#"+selected_item+".item").removeClass('clicked');
+                    $("#"+selected_item.id+".item").removeClass('clicked');
                 }
-                selected_item = id;
+                setSelectedItem(id);
                 $(this).addClass('clicked');
                 $("#drawCanvas").bind('mousemove', function(e){
                     if (mouse !== null)
                         mouse.remove();
                     mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                    if (selected_item === "menu-item-gold"){
-                        mouse.draw("menu-item-straight",0);
-                        mouse.draw("menu-item-gold",0,mouse.getTracks()[0]);
+                    if (selected_item.train || 
+                        selected_item.id === "menu-item-erase-train"){
+                        mouse.draw(straight,0);
                     }
-                    mouse.draw(selected_item, 0);
+                    mouse.draw(selected_item, 0, mouse.getTracks()[0]);
                     mouse.setFill("rgba(0,0,0,0)");
+                    if (selected_item.id === "menu-item-erase-line" || 
+                        selected_item.id === "menu-item-erase-train"){
+                        mouse.setFill("rgba(255,0,0,.5)");
+                    }
                     two.update();
                 });
                 $("#drawCanvas").on('mousedown', function(e) {
@@ -119,15 +153,12 @@ $(document).ready(function() {
 
                             mouse.removeLines();
                             mouse.removeTrain();
-                            if (selected_item === "menu-item-gold"){
-                                var tracks = hexagonMap[selected_hex].getTracks();
-                                //console.log(tracks);
-                                var index = Math.floor((theta+179)/(360/tracks.length));
-                                //console.log(index);
-                                mouse.draw("menu-item-gold",theta,tracks[index]);
-                            } else{
-                                mouse.draw(selected_item,theta);
-                            }
+                            var tracks = hexagonMap[selected_hex].getTracks();
+                            //console.log(tracks);
+                            var index = Math.floor((theta+179)/(360/tracks.length));
+                            //console.log(index);
+                            mouse.draw(selected_item,theta,tracks[index]);
+
                             //mouse.removeLines();
                         });
                     }
@@ -137,25 +168,35 @@ $(document).ready(function() {
                     var dy = mouse.getPosition().y - e.clientY;
                     var dx = e.clientX - mouse.getPosition().x;
                     var theta = Math.atan2(dy,dx) * 180/Math.PI;
-                    if (selected_item === "menu-item-gold"){
-                        var tracks = hexagonMap[selected_hex].getTracks();
+                    var tracks = hexagonMap[selected_hex].getTracks();
                         //console.log(tracks);
-                        var index = Math.floor((theta+179)/(360/tracks.length));
-                        hexagonMap[selected_hex].draw("menu-item-gold",theta,tracks[index]);
-                    } else{
-                        hexagonMap[selected_hex].draw(selected_item,theta);
+                    var index = Math.floor((theta+179)/(360/tracks.length));
+                    
+                    if (selected_item.id === 'menu-item-erase-line'){
+                        hexagonMap[selected_hex].removeLines();
+                    } else if (selected_item.id === 'menu-item-erase-train'){
+                        hexagonMap[selected_hex].removeTrain();
                     }
+                    else{
+                        hexagonMap[selected_hex].draw(selected_item,theta,tracks[index]);
+                    }
+
                     $("#drawCanvas").unbind("mousemove");
                     $("#drawCanvas").bind("mousemove", function(e){
                         if (mouse !== null)
                             mouse.remove();
                         mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                        if (selected_item === "menu-item-gold"){
+                        if (selected_item.id === "menu-item-gold" || 
+                            selected_item.id === "menu-item-erase-train"){
                             mouse.draw("menu-item-straight",0);
                             mouse.draw("menu-item-gold",0,mouse.getTracks()[0]);
                         }
                         mouse.draw(selected_item, 0);
                         mouse.setFill("rgba(0,0,0,0)");
+                        if (selected_item.id === "menu-item-erase-line" || 
+                            selected_item.id === "menu-item-erase-train"){
+                            mouse.setFill("rgba(255,0,0,.5)");
+                        }
                         two.update();
                     });
                 });
@@ -173,28 +214,66 @@ $(document).ready(function() {
                 $("#drawCanvas").unbind('mouseup');
             }
         });
-        var straight = $("#menu-item-straight");
+        var line = $("#menu-item-straight");
         var item_params = {width: 66, height: 66};
-        var straightTwo = new Two(item_params).appendTo(straight[0]);
+        var straightTwo = new Two(item_params).appendTo(line[0]);
         var hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw("menu-item-straight", 0);
+        hexagon.draw(straight, 0);
+
         var curve = $("#menu-item-curved");
         straightTwo = new Two(item_params).appendTo(curve[0]);
         hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw("menu-item-curved", 0);
+        hexagon.draw(curved, 0);
+
+        var line_erase = $('#menu-item-erase-line');
+        straightTwo = new Two(item_params).appendTo(line_erase[0]);
+        hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
+        hexagon.setFill("red");
+
+
 
         var gold = $("#menu-item-gold");
         var goldTwo = new Two(item_params).appendTo(gold[0]);
         hexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw("menu-item-straight", 0);
-        hexagon.draw("menu-item-gold", 0, hexagon.getTracks()[0]);
+        hexagon.draw(straight, 0);
+        hexagon.draw(goldItem, 0, hexagon.getTracks()[0]);
         goldTwo.update();
+        
+        
 
         var blue = $("#menu-item-blue");
         var blueTwo = new Two(item_params).appendTo(blue[0]);
-        var blueRect = blueTwo.makeRoundedRectangle(66/2, 66/2, 40, 20, 3);
-        blueRect.fill = "navy";
+        hexagon = Hexagon(blueTwo, 66/2., 66/2., RADIUS);
+        hexagon.draw(straight, 0);
+        hexagon.draw(blueItem, 0, hexagon.getTracks()[0]);
         blueTwo.update();
+        
+
+        var train_erase = $('#menu-item-erase-train');
+        goldTwo = new Two(item_params).appendTo(train_erase[0]);
+        hexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
+        hexagon.setFill("red");
+        hexagon.draw(straight, 0);
+        hexagon.draw({train:true, 
+            color: "gold", engine:"true"}, 0, hexagon.getTracks()[0]);
+        goldTwo.update();
+
+        gold.append("<div class='gold-engine type-select'></div>"+
+                    "<div class='gold-car type-select'></div>");
+        blue.append("<div class='blue-engine type-select'></div>"+
+                    "<div class='blue-car type-select'></div>");
+        $('.gold-car').click(function(){
+            goldItem.engine = false;
+        });
+        $('.blue-car').click(function(){
+            blueItem.engine = false;
+        });
+        $('.gold-engine').click(function(){
+            goldItem.engine = true;
+        });
+        $('.blue-engine').click(function(){
+            blueItem.engine = true;
+        });
     }
 
     populateMenu();

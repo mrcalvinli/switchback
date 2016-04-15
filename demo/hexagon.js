@@ -87,7 +87,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         return adjacentEdgeList;
     }
 
-    var draw = function(type, theta, edge){
+    var draw = function(item, theta, edge){
         var e1 = 1;
         if (theta > 90 && theta <= 150){
             e1 = 1; 
@@ -106,21 +106,18 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         } else {
             e1 = 6; 
         }
-        if (type === "menu-item-straight"){
+        if (item.id === "menu-item-straight"){
             var e2 = (e1 +2)%6+1;
             drawPath(e1,e2);
         }
-        else if (type === "menu-item-curved"){
+        else if (item.id === "menu-item-curved"){
             var e2 = (e1+1)%6+1;
             drawArc(e1, e2);
         }
-        else if (type === "menu-item-gold"){
+        else if (item.train){
             if (edge != null){
-                drawTrain(edge, "gold");
+                drawTrain(edge, item.color, item.engine);
             }
-        }
-        else if (type === "menu-item-blue"){
-            drawTrain(1,e2);
         }
     }
 
@@ -186,14 +183,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             train = null;
         }
         else {
-            console.log("unable to remove train, reference is null");
+            //console.log("unable to remove train, reference is null");
         }
     }
 
     var remove = function(){
         two.remove(hexagon)
         removeLines();
-        removeTrain();
         two.update();
 
     };
@@ -205,6 +201,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         for (var i =1; i<=6;i++){
             removeArc(i);
         }
+        removeTrain();
         two.update();
     }
 
@@ -254,11 +251,11 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     }
 
-    var drawTrain = function(edge, color){
+    var drawTrain = function(edge, color, engine){
         if (train != null){
             removeTrain();
         }
-        train = Train(two,edge,color,true);
+        train = Train(two,edge,color,engine);
         //console.log(arcLines[e1].getPointAt(0.5));
         //console.log(pathLines[e1].translation);
 

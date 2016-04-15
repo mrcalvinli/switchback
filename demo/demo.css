@@ -69,4 +69,36 @@ body {
     margin: 5px auto 5px;
     height: 65px;
     width: 65px;
+    position: relative;
+}
+
+.type-select {
+    height: 10px;
+    width: 10px;
+    border: 2px solid;
+    border-radius: 3px;
+    top: -65;
+    position: relative;
+}
+
+.blue-engine {
+    float: left;
+    background-color: navy;
+    border-color: navy;
+}
+
+.blue-car {
+    float: right;
+    border-color: navy;
+}
+
+.gold-engine {
+    float: left;
+    background-color: gold;
+    border-color: gold;
+}
+
+.gold-car {
+    float: right;
+    border-color: gold;
 }

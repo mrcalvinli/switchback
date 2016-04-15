@@ -35,9 +35,9 @@ var Train = function(two, path, color, engine) {
     var init = (function() {
         // Create hexagon
         var pos = path.getPointAt(.5);
-        var rect;
+        var rect = two.makeRoundedRectangle(pos.x, pos.y, 40, 20, 3);
         if (engine) {
-            rect = two.makeRoundedRectangle(pos.x, pos.y, 40, 20, 3);
+            
             rect.fill = color;
         } else {
             rect.stroke = color;
