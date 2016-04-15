@@ -1,3 +1,10 @@
+/**
+ * Object for finding paths from one hexagon to another. 
+ * 
+ * @param hexagonMap - maps two.js ID to a hexagon object in grid
+ * @param params - an object of parameters for the RADIUS, NUM HORIZONTAL
+ *                  HEXAGON, NUM VERTICAL HEXAGON
+ */
 var PathFinding = function(hexagonMap, params) {
 
     var RADIUS = params.RADIUS;
@@ -5,9 +12,16 @@ var PathFinding = function(hexagonMap, params) {
     var NUM_VERTICAL_HEX = params.NUM_VERTICAL_HEX;
 
     /**
-     * Node of a hexagon for priority heap
+     * Node of a hexagon for priority queue
+     * 
+     * @param hexagon - hexagon object of node
+     * @param startEdge - starting edge for train to traverse from
+     * @param steps - number of steps taken to get to this hexagon
+     * @param estimatedDistance - estimated shortest distance from start hexagon to
+     *                              end hexagon, using heuristic function below
+     * @param parentNode - parent of this node
      */
-    var HeapNode = function(hexagon, startEdge, steps, estimatedDistance, parentNode) {
+    var HexNode = function(hexagon, startEdge, steps, estimatedDistance, parentNode) {
 
         /**
          * Return hexagon of the node
@@ -70,6 +84,9 @@ var PathFinding = function(hexagonMap, params) {
 
         // Instance Methods
 
+        /**
+         * Get the number of elements in queue
+         */
         var size = function() {
             return heap.length;
         }
@@ -149,15 +166,19 @@ var PathFinding = function(hexagonMap, params) {
     
     // Public Methods
 
+    /**
+     * Find shortest path from one hexagon to another
+     * TODO: implement direction of train
+     */
     var shortestPath = function(startHexagon, endHexagon) {
         //Initialize priority queue
         var priorityQueue = PriorityQueue();
 
         //Put first hexagon node (after the startHexagon) into priority queue
         //TODO: make head of engine an input
-        var startHexNode = HeapNode(startHexagon, 0, 1, heuristic(startHexagon, endHexagon))
+        var startHexNode = HexNode(startHexagon, 0, 1, heuristic(startHexagon, endHexagon))
         var nextHexagon = getAdjacentHexagons(startHexagon)[6]
-        var nextHexNode = HeapNode(nextHexagon, 3, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
+        var nextHexNode = HexNode(nextHexagon, 3, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
         priorityQueue.add(nextHexNode);
 
         while (priorityQueue.size() > 0) {
@@ -189,7 +210,7 @@ var PathFinding = function(hexagonMap, params) {
                 var newEstDist = newSteps + heuristic(adjacentHex, endHexagon);
 
                 //add children into heap
-                var childNode = HeapNode(adjacentHex, nextEdge, newSteps, newEstDist, node);
+                var childNode = HexNode(adjacentHex, nextEdge, newSteps, newEstDist, node);
                 priorityQueue.add(childNode);
             }
 
@@ -197,6 +218,13 @@ var PathFinding = function(hexagonMap, params) {
     }
 
     // Private Methods
+
+    /**
+     * Provides heuristic for distance from one hexagon to another. It is
+     * an underestimate of number of hexagons required to get 
+     *
+     * @param hexagon1, hexagon2 - hexagons to find distance between
+     */
     var heuristic = function(hexagon1, hexagon2) {
         var position1 = hexagon1.getPosition();
         var position2 = hexagon2.getPosition();
@@ -205,6 +233,11 @@ var PathFinding = function(hexagonMap, params) {
         return distance/RADIUS;
     }
 
+    /**
+     * Return the adjacent hexagons in the gameboard
+     *
+     * @param hexagon - hexagon to get adjacent ones for
+     */
     var getAdjacentHexagons = function(hexagon) {
         var adjacentHexagonList = []
 
