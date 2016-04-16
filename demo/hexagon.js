@@ -31,11 +31,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     //====== Public Methods ===============
 
-    var getId = function() {
+    var instMethods = {};
+
+    var getId = instMethods.getId = function() {
         return hexagonId;
     };
 
-    var hoverMode = function(isHover) {
+    var hoverMode = instMethods.hoverMode = function(isHover) {
         if (isHover) {
             hexagonDOM.addClass('hover');
         } else {
@@ -43,7 +45,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var clickedMode = function(isClicked) {
+    var clickedMode = instMethods.clickedMode = function(isClicked) {
         if (isClicked) {
             hoverMode(false);
             hexagonDOM.addClass('clicked');
@@ -52,19 +54,19 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var doesPathExist = function(edge1, edge2) {
+    var doesPathExist = instMethods.doesPathExist = function(edge1, edge2) {
         if (edge1 > edge2) {
             return doesPathExist(edge2, edge1);
         }
 
         return (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null);
-    }
+    };
 
-    var doesArcExist = function(edge1) {
+    var doesArcExist = instMethods.doesArcExist = function(edge1) {
         return arcLines[edge1] !== null
-    }
+    };
 
-    var adjacentEdges = function(edge) {
+    var adjacentEdges = instMethods.adjacentEdges = function(edge) {
         var adjacentEdgeList = [];
 
         // check for straight line paths
@@ -85,9 +87,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
 
         return adjacentEdgeList;
-    }
+    };
 
-    var draw = function(item, theta, edge){
+    var draw = instMethods.draw = function(item, theta, edge){
         var e1 = 1;
         if (theta > 90 && theta <= 150){
             e1 = 1; 
@@ -119,9 +121,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                 drawTrain(edge, item.color, item.engine);
             }
         }
-    }
+    };
 
-    var drawPath = function(edge1, edge2) {
+    var drawPath = instMethods.drawPath = function(edge1, edge2) {
         if (edge1 === edge2) {
             return;
         }
@@ -143,7 +145,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var getTracks = function(){
+    var getTracks = instMethods.getTracks = function(){
         var tracks = [];
         for (var i = 1; i <= 3; i++){
             if (pathLines[i] !== null)
@@ -154,9 +156,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                 tracks.push(arcLines[i]);
         }
         return tracks;
-    }
+    };
 
-    var removePath = function(edge1, edge2) {
+    var removePath = instMethods.removePath = function(edge1, edge2) {
         if (edge1 > edge2) {
             return removePath(edge2, edge1);
         }
@@ -168,7 +170,8 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
         }
     };
-    var removeArc = function(edge1) {
+    
+    var removeArc = instMethods.removeArc = function(edge1) {
         if (arcLines[edge1] !== null) {
             arcLines[edge1].remove();
             arcLines[edge1] = null;
@@ -177,7 +180,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var removeTrain = function(){
+    var removeTrain = instMethods.removeTrain = function(){
         if (train !== null){
             train.remove();
             train = null;
@@ -185,16 +188,16 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         else {
             //console.log("unable to remove train, reference is null");
         }
-    }
+    };
 
-    var remove = function(){
+    var remove = instMethods.remove = function(){
         two.remove(hexagon)
         removeLines();
         two.update();
 
     };
 
-    var removeLines = function(){
+    var removeLines = instMethods.removeLines = function(){
         for (var i =1; i<=3;i++){
             removePath(i,i+3);
         }
@@ -203,22 +206,22 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
         removeTrain();
         two.update();
-    }
+    };
 
-    var getPosition = function(){
+    var getPosition = instMethods.getPosition = function(){
         return {x: xCenter, y: yCenter};
     };
 
-    var getPositionIndex = function() {
+    var getPositionIndex = instMethods.getPositionIndex = function() {
         return {xIndex: xIndex, yIndex: yIndex}
-    }
+    };
 
-    var setFill = function(fill){
+    var setFill = instMethods.setFill = function(fill){
         hexagon.fill = fill;
         two.update();
     };
 
-    var rotate = function(angle){
+    var rotate = instMethods.rotate = function(angle){
         hexagon.rotation = angle;
         two.update();
     };
@@ -321,22 +324,5 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         hexagonDOM = $("#" + hexagonId);
     })();
 
-    return {
-        getId: getId,
-        hoverMode: hoverMode,
-        clickedMode: clickedMode,
-        doesPathExist: doesPathExist,
-        adjacentEdges: adjacentEdges,
-        draw: draw,
-        drawPath: drawPath,
-        getTracks: getTracks,
-        removePath: removePath,
-        remove: remove,
-        removeLines: removeLines,
-        removeTrain: removeTrain,
-        getPosition: getPosition,
-        getPositionIndex: getPositionIndex,
-        setFill: setFill,
-        rotate: rotate
-    };
+    return instMethods;
 }
