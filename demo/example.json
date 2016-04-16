@@ -1,0 +1,23 @@
+gameboard: {
+    "numHorizontal": 10,
+    "numVertical": 10,
+    "hexRadius": 30,
+    "hexagons": [
+        ["hexagon_obj", "...", "hexagon_obj"],
+        ["..."],
+        ["hexagon_obj", "...", "hexagon_obj"]
+    ]
+}
+
+hexagon_obj: {
+    "pathLines": [0, 2],
+    "arcLines": [0, 1, 3, 4],
+    "train": "train_obj"
+}
+
+train_obj: {
+    "edgeA": 0,
+    "edgeB": 1,
+    "color": "white",
+    "engine": true
+}
