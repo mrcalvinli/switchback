@@ -177,7 +177,7 @@ var PathFinding = function(hexagonMap, params) {
         //Put first hexagon node (after the startHexagon) into priority queue
         //TODO: make head of engine an input
         var startHexNode = HexNode(startHexagon, 0, 1, heuristic(startHexagon, endHexagon))
-        var nextHexagon = getAdjacentHexagons(startHexagon)[6]
+        var nextHexagon = getAdjacentHexagons(startHexagon)[5]
         var nextHexNode = HexNode(nextHexagon, 3, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
         priorityQueue.add(nextHexNode);
 
@@ -205,7 +205,7 @@ var PathFinding = function(hexagonMap, params) {
             for (var i = 0; i < adjacentEdges.length; i++) {
                 var adjacentEdge = adjacentEdges[i];
                 var adjacentHex = adjacentHexs[adjacentEdge]
-                var nextEdge = (adjacentEdge + 2) % 6 + 1;
+                var nextEdge = (adjacentEdge + 3) % 6;
                 var newSteps = steps + 1;
                 var newEstDist = newSteps + heuristic(adjacentHex, endHexagon);
 
@@ -273,12 +273,12 @@ var PathFinding = function(hexagonMap, params) {
         }
 
         return {
-            1: adjacentHexagonList[0] !== null ? adjacentHexagonList[0] : undefined,
-            2: adjacentHexagonList[1] !== null ? adjacentHexagonList[1] : undefined,
-            3: adjacentHexagonList[3] !== null ? adjacentHexagonList[3] : undefined,
-            4: adjacentHexagonList[5] !== null ? adjacentHexagonList[5] : undefined,
-            5: adjacentHexagonList[4] !== null ? adjacentHexagonList[4] : undefined,
-            6: adjacentHexagonList[2] !== null ? adjacentHexagonList[2] : undefined
+            0: adjacentHexagonList[0] !== null ? adjacentHexagonList[0] : undefined,
+            1: adjacentHexagonList[1] !== null ? adjacentHexagonList[1] : undefined,
+            2: adjacentHexagonList[3] !== null ? adjacentHexagonList[3] : undefined,
+            3: adjacentHexagonList[5] !== null ? adjacentHexagonList[5] : undefined,
+            4: adjacentHexagonList[4] !== null ? adjacentHexagonList[4] : undefined,
+            5: adjacentHexagonList[2] !== null ? adjacentHexagonList[2] : undefined
         }
     }
 

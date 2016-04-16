@@ -12,18 +12,18 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     // paths
     var pathLines = {
+        0: null,
         1: null,
-        2: null,
-        3: null
+        2: null
     };
 
     var arcLines = {
+        0: null,
         1: null,
         2: null,
         3: null,
         4: null,
-        5: null,
-        6: null
+        5: null
     };
 
     var train = null;
@@ -70,18 +70,18 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         var adjacentEdgeList = [];
 
         // check for straight line paths
-        var oppositeEdge = ((edge + 2) % 6) + 1;
+        var oppositeEdge = (edge + 3) % 6;
         if (doesPathExist(edge, oppositeEdge)) {
             adjacentEdgeList.push(oppositeEdge);
         }
 
         // check for arc paths
         if (doesArcExist(edge)) {
-            var linkedEdge = (edge + 1) % 6 + 1;
+            var linkedEdge = (edge + 2) % 6;
             adjacentEdgeList.push(linkedEdge);
         }
 
-        var linkedEdge = (edge + 3) % 6 + 1;
+        var linkedEdge = (edge + 2) % 6;
         if (doesArcExist(linkedEdge)) {
             adjacentEdgeList.push(linkedEdge);
         }
@@ -90,30 +90,30 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     };
 
     var draw = instMethods.draw = function(item, theta, edge){
-        var e1 = 1;
+        var e1 = 0;
         if (theta > 90 && theta <= 150){
-            e1 = 1; 
+            e1 = 0; 
         }
         else if (theta <= 90 && theta > 30){
-            e1 = 2; 
+            e1 = 1; 
         }
         else if (theta <= 30 && theta > -30){
-            e1 = 3; 
+            e1 = 2; 
         }
         else if (theta <= -30 && theta > -90){
-            e1 = 4; 
+            e1 = 3; 
         }
         else if (theta <= -90 && theta > -150){
-            e1 = 5; 
+            e1 = 4; 
         } else {
-            e1 = 6; 
+            e1 = 5; 
         }
         if (item.id === "menu-item-straight"){
-            var e2 = (e1 +2)%6+1;
-            drawPath(e1,e2);
+            var e2 = (e1 + 3) % 6;
+            drawPath(e1, e2);
         }
         else if (item.id === "menu-item-curved"){
-            var e2 = (e1+1)%6+1;
+            var e2 = (e1 + 2) % 6;
             drawArc(e1, e2);
         }
         else if (item.train){
@@ -123,6 +123,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
+    //TODO: fix this method to be like drawArc
     var drawPath = instMethods.drawPath = function(edge1, edge2) {
         if (edge1 === edge2) {
             return;
@@ -147,11 +148,11 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
-        for (var i = 1; i <= 3; i++){
+        for (var i = 0; i < 3; i++){
             if (pathLines[i] !== null)
                 tracks.push(pathLines[i]);
         }
-        for (var i = 1; i <= 6; i++){
+        for (var i = 0; i < 6; i++){
             if (arcLines[i] !== null)
                 tracks.push(arcLines[i]);
         }
@@ -198,10 +199,10 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     };
 
     var removeLines = instMethods.removeLines = function(){
-        for (var i =1; i<=3;i++){
-            removePath(i,i+3);
+        for (var i = 0; i < 3; i++){
+            removePath(i, i + 3);
         }
-        for (var i =1; i<=6;i++){
+        for (var i = 0; i < 6; i++){
             removeArc(i);
         }
         removeTrain();
@@ -298,7 +299,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     }
 
     var getSideCoord = function(edgeIndex) {
-        var angleFromCenter = ((240 + (edgeIndex - 1)*60) % 360) * Math.PI/180.0
+        var angleFromCenter = ((240 + edgeIndex * 60) % 360) * Math.PI/180.0
         var distToEdge = radius*Math.sqrt(3)/2.0;
         var dx = distToEdge * Math.cos(angleFromCenter);
         var dy = distToEdge * Math.sin(angleFromCenter);
