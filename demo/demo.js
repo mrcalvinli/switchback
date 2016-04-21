@@ -104,15 +104,32 @@ $(document).ready(function() {
             selected_item = blueItem;
     }
 
+    var itemSelectMouseHandler = function(e){
+        if (mouse !== null)
+            mouse.remove();
+        mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
+        if (selected_item.train || 
+            selected_item.id === "menu-item-erase-train"){
+            mouse.draw(straight,0);
+        }
+        mouse.draw(selected_item, 0, mouse.getTracks()[0]);
+        mouse.setFill("rgba(0,0,0,0)");
+        if (selected_item.id === "menu-item-erase-line" || 
+            selected_item.id === "menu-item-erase-train"){
+            mouse.setFill("rgba(255,0,0,.5)");
+        }
+        two.update();
+    }
+
     function populateMenu() {
         var tracks = $("#tracks");
         var trains = $("#trains");
-        tracks.append("<div class='item' id='menu-item-straight'></div>");
-        tracks.append("<div class='item' id='menu-item-curved'></div>");
-        tracks.append("<div class='item' id='menu-item-erase-line'></div>");
-        trains.append("<div class='item' id='menu-item-gold'></div>");
-        trains.append("<div class='item' id='menu-item-blue'></div>");
-        trains.append("<div class='item' id='menu-item-erase-train'></div>");
+        tracks.append("<div class='item-wrapper'><div class='item' id='menu-item-straight'></div></div>");
+        tracks.append("<div class='item-wrapper'><div class='item' id='menu-item-curved'></div></div>");
+        tracks.append("<div class='item-wrapper'><div class='item' id='menu-item-erase-line'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='menu-item-gold'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='menu-item-blue'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='menu-item-erase-train'></div></div>");
         $(".item").on('click', function() {
             var id = $(this).attr('id');
             console.log(id);
@@ -122,22 +139,7 @@ $(document).ready(function() {
                 }
                 setSelectedItem(id);
                 $(this).addClass('clicked');
-                $("#drawCanvas").bind('mousemove', function(e){
-                    if (mouse !== null)
-                        mouse.remove();
-                    mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                    if (selected_item.train || 
-                        selected_item.id === "menu-item-erase-train"){
-                        mouse.draw(straight,0);
-                    }
-                    mouse.draw(selected_item, 0, mouse.getTracks()[0]);
-                    mouse.setFill("rgba(0,0,0,0)");
-                    if (selected_item.id === "menu-item-erase-line" || 
-                        selected_item.id === "menu-item-erase-train"){
-                        mouse.setFill("rgba(255,0,0,.5)");
-                    }
-                    two.update();
-                });
+                $("#drawCanvas").bind('mousemove', itemSelectMouseHandler);
                 $("#drawCanvas").on('mousedown', function(e) {
                     var id = getHexObjFromPos(e.clientX,e.clientY).getId();
                     if (id !== selected_hex){
@@ -182,23 +184,7 @@ $(document).ready(function() {
                     }
 
                     $("#drawCanvas").unbind("mousemove");
-                    $("#drawCanvas").bind("mousemove", function(e){
-                        if (mouse !== null)
-                            mouse.remove();
-                        mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
-                        if (selected_item.id === "menu-item-gold" || 
-                            selected_item.id === "menu-item-erase-train"){
-                            mouse.draw("menu-item-straight",0);
-                            mouse.draw("menu-item-gold",0,mouse.getTracks()[0]);
-                        }
-                        mouse.draw(selected_item, 0);
-                        mouse.setFill("rgba(0,0,0,0)");
-                        if (selected_item.id === "menu-item-erase-line" || 
-                            selected_item.id === "menu-item-erase-train"){
-                            mouse.setFill("rgba(255,0,0,.5)");
-                        }
-                        two.update();
-                    });
+                    $("#drawCanvas").bind("mousemove", itemSelectMouseHandler);
                 });
 
             } else {
@@ -234,18 +220,18 @@ $(document).ready(function() {
 
         var gold = $("#menu-item-gold");
         var goldTwo = new Two(item_params).appendTo(gold[0]);
-        hexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw(straight, 0);
-        hexagon.draw(goldItem, 0, hexagon.getTracks()[0]);
+        var goldHexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
+        goldHexagon.draw(straight, 0);
+        goldHexagon.draw(goldItem, 0, goldHexagon.getTracks()[0]);
         goldTwo.update();
         
         
 
         var blue = $("#menu-item-blue");
         var blueTwo = new Two(item_params).appendTo(blue[0]);
-        hexagon = Hexagon(blueTwo, 66/2., 66/2., RADIUS);
-        hexagon.draw(straight, 0);
-        hexagon.draw(blueItem, 0, hexagon.getTracks()[0]);
+        var blueHexagon = Hexagon(blueTwo, 66/2., 66/2., RADIUS);
+        blueHexagon.draw(straight, 0);
+        blueHexagon.draw(blueItem, 0, blueHexagon.getTracks()[0]);
         blueTwo.update();
         
 
@@ -258,21 +244,25 @@ $(document).ready(function() {
             color: "gold", engine:"true"}, 0, hexagon.getTracks()[0]);
         goldTwo.update();
 
-        gold.append("<div class='gold-engine type-select'></div>"+
+        gold.before("<div class='gold-engine type-select'></div>"+
                     "<div class='gold-car type-select'></div>");
-        blue.append("<div class='blue-engine type-select'></div>"+
+        blue.before("<div class='blue-engine type-select'></div>"+
                     "<div class='blue-car type-select'></div>");
         $('.gold-car').click(function(){
             goldItem.engine = false;
+            goldHexagon.draw(goldItem, 0, goldHexagon.getTracks()[0]);
         });
         $('.blue-car').click(function(){
             blueItem.engine = false;
+            blueHexagon.draw(blueItem, 0, blueHexagon.getTracks()[0]);
         });
         $('.gold-engine').click(function(){
             goldItem.engine = true;
+            goldHexagon.draw(goldItem, 0, goldHexagon.getTracks()[0]);
         });
         $('.blue-engine').click(function(){
             blueItem.engine = true;
+            blueHexagon.draw(blueItem, 0, blueHexagon.getTracks()[0]);
         });
     }
 
