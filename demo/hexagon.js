@@ -10,14 +10,14 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     var hexagonDOM;
     var hexagon;
 
-    // paths
-    var pathLines = {
+    // Track Paths
+    var linePaths = {
         0: null,
         1: null,
         2: null
     };
 
-    var arcLines = {
+    var arcPaths = {
         0: null,
         1: null,
         2: null,
@@ -64,7 +64,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         // Check of straight line tracks
         if (Math.abs(edge1 - edge2) === 3) {
             var minEdgeIndex = Math.min(edge1, edge2);
-            return pathLines[minEdgeIndex] !== null;
+            return linePaths[minEdgeIndex] !== null;
         }
         // Check for arc tracks
         else if (Math.abs(edge1 - edge2) % 2 === 0 && edge1 !== edge2) {
@@ -72,7 +72,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             if ((edge1 - edge2 + 6) % 6 === 2) {
                 arcEdgeIndex = edge2;
             }
-            return arcLines[arcEdgeIndex] !== null;
+            return arcPaths[arcEdgeIndex] !== null;
         }
 
         return false;
@@ -157,7 +157,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             var largerEdge = Math.max(edge1, edge2);
 
             var line = drawLine(smallerEdge, largerEdge);
-            pathLines[smallerEdge] = Path(two, line, smallerEdge, largerEdge);
+            linePaths[smallerEdge] = Path(two, line, smallerEdge, largerEdge);
         } else {
             console.error("Edges must be opposite from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -184,7 +184,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             }
 
             var arc = makeArc(startEdge, endEdge);
-            arcLines[startEdge] = Path(two, arc, startEdge, endEdge);
+            arcPaths[startEdge] = Path(two, arc, startEdge, endEdge);
         } else {
             console.error("Edges must be two edges apart from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -193,12 +193,12 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
         for (var i = 0; i < 3; i++){
-            if (pathLines[i] !== null)
-                tracks.push(pathLines[i]);
+            if (linePaths[i] !== null)
+                tracks.push(linePaths[i]);
         }
         for (var i = 0; i < 6; i++){
-            if (arcLines[i] !== null)
-                tracks.push(arcLines[i]);
+            if (arcPaths[i] !== null)
+                tracks.push(arcPaths[i]);
         }
         return tracks;
     };
@@ -208,18 +208,18 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             return removePath(edge2, edge1);
         }
 
-        if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null) {
-            pathLines[edge1].remove();
-            pathLines[edge1] = null;
+        if (Math.abs(edge1 - edge2) === 3 && linePaths[edge1] !== null) {
+            linePaths[edge1].remove();
+            linePaths[edge1] = null;
         } else {
             //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
         }
     };
     
     var removeArc = instMethods.removeArc = function(edge1) {
-        if (arcLines[edge1] !== null) {
-            arcLines[edge1].remove();
-            arcLines[edge1] = null;
+        if (arcPaths[edge1] !== null) {
+            arcPaths[edge1].remove();
+            arcPaths[edge1] = null;
         } else {
             //console.log('Unable to remove line from edge ' + edge1 + ' to ' + edge2);
         }
@@ -288,8 +288,8 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             removeTrain();
         }
         train = Train(two,edge,color,engine);
-        //console.log(arcLines[e1].getPointAt(0.5));
-        //console.log(pathLines[e1].translation);
+        //console.log(arcPaths[e1].getPointAt(0.5));
+        //console.log(linePaths[e1].translation);
 
         //train.edge = e1;
         two.update();
