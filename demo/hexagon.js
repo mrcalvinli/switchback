@@ -54,39 +54,56 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var doesPathExist = instMethods.doesPathExist = function(edge1, edge2) {
-        if (edge1 > edge2) {
-            return doesPathExist(edge2, edge1);
+    /**
+     * Checks if there exists a track (straight or arc) from edge1 to edge2.
+     * 
+     * @param edge1 - edge index of one of the vertices of the track
+     * @param edge2 - edge index of the other vertex of the track
+     */
+    var doesTrackExist = instMethods.doesTrackExist = function(edge1, edge2) {
+        // Check of straight line tracks
+        if (Math.abs(edge1 - edge2) === 3) {
+            var minEdgeIndex = Math.min(edge1, edge2);
+            return pathLines[minEdgeIndex] !== null;
+        }
+        // Check for arc tracks
+        else if (Math.abs(edge1 - edge2) % 2 === 0 && edge1 !== edge2) {
+            var arcEdgeIndex = edge1;
+            if ((edge1 - edge2 + 6) % 6 === 2) {
+                arcEdgeIndex = edge2;
+            }
+            return arcLines[arcEdgeIndex] !== null;
         }
 
-        return (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] !== null);
+        return false;
     };
 
-    var doesArcExist = instMethods.doesArcExist = function(edge1) {
-        return arcLines[edge1] !== null
-    };
-
+    /**
+     * Gets a sorted list of adjacent edge indices for those that are connected
+     * to a given edge via a track (straight or arc)
+     *
+     * @param edge - edge index of hexagon
+     */
     var adjacentEdges = instMethods.adjacentEdges = function(edge) {
         var adjacentEdgeList = [];
 
         // check for straight line paths
         var oppositeEdge = (edge + 3) % 6;
-        if (doesPathExist(edge, oppositeEdge)) {
+        if (doesTrackExist(edge, oppositeEdge)) {
             adjacentEdgeList.push(oppositeEdge);
         }
 
         // check for arc paths
-        if (doesArcExist(edge)) {
-            var linkedEdge = (edge + 2) % 6;
-            adjacentEdgeList.push(linkedEdge);
+        var arcEdgeClockwise = (edge + 2) % 6;
+        if (doesTrackExist(edge, arcEdgeClockwise)) {
+            adjacentEdgeList.push(arcEdgeClockwise);
+        }
+        var arcEdgeCounter = (edge + 4) % 6;
+        if (doesTrackExist(edge, arcEdgeCounter)) {
+            adjacentEdgeList.push(arcEdgeCounter);
         }
 
-        var linkedEdge = (edge + 2) % 6;
-        if (doesArcExist(linkedEdge)) {
-            adjacentEdgeList.push(linkedEdge);
-        }
-
-        return adjacentEdgeList;
+        return adjacentEdgeList.sort();
     };
 
     var draw = instMethods.draw = function(item, theta, edge){
@@ -110,11 +127,11 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
         if (item.id === "menu-item-straight"){
             var e2 = (e1 + 3) % 6;
-            drawPath(e1, e2);
+            drawLineTrack(e1, e2);
         }
         else if (item.id === "menu-item-curved"){
             var e2 = (e1 + 2) % 6;
-            drawArc(e1, e2);
+            drawArcTrack(e1, e2);
         }
         else if (item.train){
             if (edge != null){
@@ -123,26 +140,53 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    //TODO: fix this method to be like drawArc
-    var drawPath = instMethods.drawPath = function(edge1, edge2) {
-        if (edge1 === edge2) {
+    /**
+     * Draw a straight line track on the hexagon from edge1 to edge2, only if it
+     * doesn't already exist. Otherwise, nothing will happen.
+     *
+     * @param edge1 - edge index of one of the vertices of the line
+     * @param edge2 - edge index of the other vertex of the line
+     */
+    var drawLineTrack = instMethods.drawLineTrack = function(edge1, edge2) {
+        if (doesTrackExist(edge1, edge2)) {
             return;
         }
-        if (edge1 > edge2) {
-            return drawPath(edge2, edge1);
-        }
+        
+        if (Math.abs(edge2 - edge1) === 3) {
+            var smallerEdge = Math.min(edge1, edge2);
+            var largerEdge = Math.max(edge1, edge2);
 
-        if (doesPathExist(edge1,edge2)){
-            return;
-        }
-        if (Math.abs(edge1 - edge2) === 3 && pathLines[edge1] === null) {
-
-            var line = drawLine(edge1, edge2);
-            pathLines[edge1] =  Path(two,line,edge1,edge2);
-        } else if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
-            var arc = drawArc(edge1, edge2);
+            var line = drawLine(smallerEdge, largerEdge);
+            pathLines[smallerEdge] = Path(two, line, smallerEdge, largerEdge);
         } else {
-            console.log('Unable to draw such line now from edge ' + edge1 + ' to ' + edge2);
+            console.error("Edges must be opposite from each other; given (" + edge1 + ", " + edge2 + ")");
+        }
+    };
+
+    /**
+     * Draw an arc track on the hexagon from edge1 to edge2, only if it doesn't
+     * already exist. Otherwise, nothing will happen.
+     *
+     * @param edge1 - edge index of one of the vertices of the arc
+     * @param edge2 - edge index of the other vertex of the arc
+     */
+    var drawArcTrack = instMethods.drawArcTrack = function(edge1, edge2) {
+        if (doesTrackExist(edge1, edge2)) {
+            return;
+        }
+
+        if (Math.abs(edge1 - edge2) % 2 === 0 && edge1 !== edge2) {
+            var startEdge = edge1;
+            var endEdge = edge2;
+            if ((edge1 - edge2 + 6) % 6 === 2) {
+                startEdge = edge2;
+                endEdge = edge1;
+            }
+
+            var arc = makeArc(startEdge, endEdge);
+            arcLines[startEdge] = Path(two, arc, startEdge, endEdge);
+        } else {
+            console.error("Edges must be two edges apart from each other; given (" + edge1 + ", " + edge2 + ")");
         }
     };
 
@@ -237,22 +281,6 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         two.update();
 
         return line;
-    }
-
-    var drawArc = function(edge1, edge2) {
-        if (edge1 === edge2) {
-            return;
-        }
-
-        if (doesArcExist(edge1)){
-            return;
-        }
-        if (Math.abs(edge1 - edge2) % 2 === 0 && arcLines[edge1] === null) {
-            var arc = makeArc(edge1, edge2);
-            arcLines[edge1] = Path(two,arc,edge1,edge2);
-        } else {
-            console.log('Unable to draw such arc now from edge ' + edge1 + ' to ' + edge2);
-        }
     }
 
     var drawTrain = function(edge, color, engine){
