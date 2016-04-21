@@ -1,0 +1,12 @@
+{
+    "numHorizontal": 5,
+    "numVertical": 5,
+    "hexRadius": 30,
+    "hexagons": [
+        [null, null, null, null, null], 
+        [null, null, { "lineTracks": [0], "arcTracks": [0, 1], "train": null } , null, null], 
+        [null, null, null, null, null], 
+        [null, null, null, null, null], 
+        [null, null, null, null, null]
+    ]
+}

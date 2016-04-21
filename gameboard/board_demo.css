@@ -1,0 +1,17 @@
+#drawCanvas {
+    height: 700;
+    width: 700;
+    border: black solid 1px;
+    display: inline-block;
+}
+
+body {
+    margin: 0;
+}
+.hover {
+    fill: #aaeeee;
+}
+.clicked {
+    fill: #eeaaaa;
+    background-color: #eeaaaa;
+}
