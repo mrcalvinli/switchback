@@ -114,7 +114,7 @@ $(document).ready(function() {
         if (selected_item !== 'erase' && 
             selected_item !== 'rotate' && selected_item !== 'copy') {
             
-            mouse = Hexagon(two, e.clientX, e.clientY, RADIUS, 6);
+            mouse = Hexagon(two, e.pageX, e.pageY, RADIUS, 6);
             if (selected_item.train || 
                 selected_item.id === "menu-item-erase-train"){
                 mouse.draw(straight,0);
@@ -126,11 +126,11 @@ $(document).ready(function() {
                 mouse.setFill("rgba(255,0,0,.5)");
             }
         } else {
-            var half = two.makeRectangle(e.clientX, e.clientY, 10, 40);
+            var half = two.makeRectangle(e.pageX, e.pageY, 10, 40);
             half.fill = "rgba(255,0,0,.5)";
             half.rotation = Math.PI/4;
             half.noStroke();
-            var half2 = two.makeRectangle(e.clientX, e.clientY, 10, 40);
+            var half2 = two.makeRectangle(e.pageX, e.pageY, 10, 40);
             half2.fill = "rgba(255,0,0,.5)";
             half2.rotation = -Math.PI/4;
             half2.noStroke();
@@ -153,6 +153,7 @@ $(document).ready(function() {
             console.log(id);
             $("#drawCanvas").off('mousemove');
             $("#drawCanvas").off('mousedown');
+            $("#drawCanvas").off('click');
             $("#drawCanvas").unbind('mouseup');
             if (selected_item === null || (id !== selected_item.id && id !== selected_item)){
                 if (selected_item !== null) {
@@ -164,14 +165,16 @@ $(document).ready(function() {
                 $(this).addClass('clicked');
                 $("#drawCanvas").bind('mousemove', itemSelectMouseHandler);
                 $("#drawCanvas").on('mousedown', function(e) {
-                    var id = getHexObjFromPos(e.clientX,e.clientY).getId();
+                    if (selected_item === 'erase' || selected_item === 'rotate'){
+                        return;
+                    }
+                    var id = getHexObjFromPos(e.pageX,e.pageY).getId();
                     if (id !== selected_hex){
+                        ;
                         $('#'+id).click();
                     }
                     //mouse.setPosition(hexagonMap[id].x,hexagonMap[id].y);
-                    if (selected_item === 'erase'){
-                        return;
-                    }
+                    
                     if (selected_item === 'copy'){
                         mouse.remove();
                         copiedHex = hexagonMap[selected_hex].copy();
@@ -179,7 +182,7 @@ $(document).ready(function() {
                         $("#drawCanvas").unbind("mousemove");
                         $("#drawCanvas").bind("mousemove", function(e){
                             
-                            copiedHex.setPosition(e.clientX, e.clientY);
+                            copiedHex.setPosition(e.pageX, e.pageY);
                             //mouse.removeLines();
                         });
                         return;
@@ -188,13 +191,13 @@ $(document).ready(function() {
                         mouse.setPosition(hexagonMap[selected_hex].getPosition().x, hexagonMap[selected_hex].getPosition().y);
                         $("#drawCanvas").unbind("mousemove");
                         $("#drawCanvas").bind("mousemove", function(e){
-                            var dy = mouse.getPosition().y - e.clientY;
-                            var dx = e.clientX - mouse.getPosition().x;
+                            var dy = mouse.getPosition().y - e.pageY;
+                            var dx = e.pageX - mouse.getPosition().x;
                             var theta = Math.atan2(dy,dx) * 180/Math.PI;
                             mouse.removeLines();
                             mouse.removeTrain();
                             var tracks = hexagonMap[selected_hex].getTracks();
-                            console.log(tracks);
+                            //console.log(tracks);
                             var index = Math.floor((theta+179)/(360/tracks.length));
                             //console.log(index);
                             mouse.draw(selected_item,theta,tracks[index]);
@@ -204,22 +207,28 @@ $(document).ready(function() {
                     }
                 });
                 $("#drawCanvas").on('mouseup', function(e) {
-                    
                     if (selected_item === 'erase'){
                         if (hexagonMap[selected_hex].hasTrain()){
                             console.log('train');
-                            hexagonMap[selected_hex].removeTrain()
+                            hexagonMap[selected_hex].removeTrain();
                         }
                         else {
                             console.log('tracks');
-                            hexagonMap[selected_hex].removeLines()
+                            hexagonMap[selected_hex].removeLines();
                         }
+                        return;
+                    }
+                    if (selected_item === 'rotate'){
+                        if (e.which === 1)
+                            hexagonMap[selected_hex].rotateLeft();
+                        if (e.which === 3)
+                            hexagonMap[selected_hex].rotateRight();
                         return;
                     }
                     if (selected_item === 'copy'){
                         $("#drawCanvas").unbind("mousemove");
                         $("#drawCanvas").bind('mousemove', itemSelectMouseHandler);
-                        var id = getHexObjFromPos(e.clientX,e.clientY).getId();
+                        var id = getHexObjFromPos(e.pageX,e.pageY).getId();
                         if (id !== selected_hex){
                             $('#'+id).click();
                             copiedHex.echo(hexagonMap[selected_hex]);
@@ -229,8 +238,8 @@ $(document).ready(function() {
                         return;
                     }
                     mouse.removeLines();
-                    var dy = mouse.getPosition().y - e.clientY;
-                    var dx = e.clientX - mouse.getPosition().x;
+                    var dy = mouse.getPosition().y - e.pageY;
+                    var dx = e.pageX - mouse.getPosition().x;
                     var theta = Math.atan2(dy,dx) * 180/Math.PI;
                     var tracks = hexagonMap[selected_hex].getTracks();
                         //console.log(tracks);
@@ -260,6 +269,7 @@ $(document).ready(function() {
                 $(this).removeClass('clicked');
                 $("#drawCanvas").off('mousemove');
                 $("#drawCanvas").off('mousedown');
+                $("#drawCanvas").off('click');
                 $("#drawCanvas").unbind('mouseup');
             }
         });
