@@ -24,11 +24,16 @@ var Train = function(two, path, color, engine) {
     }
 
     var getPath = function(){
-        return path;
+        return currentPath;
     }
 
     var setPath = function(newPath){
         currentPath = newPath;
+    }
+
+    var translate = function(dx, dy){
+        train.translation.x+=dx;
+        train.translation.y+=dy;
     }
 
     //====== Initialization ===============
@@ -69,7 +74,9 @@ var Train = function(two, path, color, engine) {
         remove: remove,
         moveOnPath: moveOnPath,
         setPath: setPath,
-        getPath: getPath
+        getPath: getPath,
+        color: type,
+        translate: translate
 
     };
 }
