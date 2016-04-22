@@ -85,7 +85,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                     newHex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                    newHex.getTracks()[newHex.getTracks().length - 1]);
+                    newHex.getTracks()[0]);
                 }
             }
         }
@@ -101,7 +101,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                     newHex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                        newHex.getTracks()[newHex.getTracks().length - 1]);
+                        newHex.getTracks()[0]);
                 }
             }
         }
@@ -124,7 +124,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                     hex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                    hex.getTracks()[hex.getTracks().length - 1]);
+                    hex.getTracks()[0]);
                 }
             }
         }
@@ -140,7 +140,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
                     hex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                        hex.getTracks()[hex.getTracks().length - 1]);
+                        hex.getTracks()[0]);
                 }
             }
         }
@@ -232,7 +232,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             drawArcTrack(e1, e2);
         }
         else if (item.train){
-            if (edge !== null){
+            if (edge !== null && edge !== undefined){
                 drawTrain(edge, item.color, item.engine);
             }
         }
@@ -256,6 +256,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
             var line = drawLine(smallerEdge, largerEdge);
             linePaths[smallerEdge] = Path(two, line, smallerEdge, largerEdge);
+            if (train !== null){
+                redrawTrain();
+            }
         } else {
             console.error("Edges must be opposite from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -283,6 +286,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
             var arc = makeArc(startEdge, endEdge);
             arcPaths[startEdge] = Path(two, arc, startEdge, endEdge);
+            if (train !== null){
+                redrawTrain();
+            }
         } else {
             console.error("Edges must be two edges apart from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -290,14 +296,15 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
-        for (var i = 0; i < 3; i++){
-            if (linePaths[i] !== null)
-                tracks.push(linePaths[i]);
-        }
-        for (var i = 0; i < 6; i++){
+        for (var i = 5; i >= 0; i--){
             if (arcPaths[i] !== null)
                 tracks.push(arcPaths[i]);
         }
+        for (var i = 2; i >=0; i--){
+            if (linePaths[i] !== null)
+                tracks.push(linePaths[i]);
+        }
+        
         return tracks;
     };
 
@@ -390,6 +397,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         //console.log(linePaths[e1].translation);
 
         //train.edge = e1;
+        two.update();
+    }
+
+    var redrawTrain = function() {
+        newTrain = Train(two, train.getPath(), train.color, train.isEngine);
+        removeTrain();
+        train = newTrain;
         two.update();
     }
 

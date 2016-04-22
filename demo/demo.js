@@ -191,11 +191,10 @@ $(document).ready(function() {
                             var dy = mouse.getPosition().y - e.clientY;
                             var dx = e.clientX - mouse.getPosition().x;
                             var theta = Math.atan2(dy,dx) * 180/Math.PI;
-
                             mouse.removeLines();
                             mouse.removeTrain();
                             var tracks = hexagonMap[selected_hex].getTracks();
-                            //console.log(tracks);
+                            console.log(tracks);
                             var index = Math.floor((theta+179)/(360/tracks.length));
                             //console.log(index);
                             mouse.draw(selected_item,theta,tracks[index]);
