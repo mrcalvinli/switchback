@@ -16,6 +16,12 @@ body {
     background-color: #eeaaaa;
 }
 
+.line-sep {
+    border: 2px solid white;
+    border-radius: 3px;
+    margin: 10px 0 10px;
+}
+
 #track-menu {
     height: 500;
     width: 300;
@@ -38,10 +44,20 @@ body {
     background-color: #69d6ff;
 }
 
+#track-types {
+    height: 480;
+    width: 280;
+    border: 10px #69d6ff solid;
+    border-radius: 10px;
+    display: inline-block;
+    top: 0px;
+    position: absolute;
+    background-color: #69d6ff;
+}
+
 .menu-col {
     display: inline-block;
     width: 75px;
-    height: 100%;
     margin-left: 6px;
     margin-right: 6px;
     text-align: center;
@@ -63,7 +79,7 @@ body {
     border-radius: 3px;
 }
 
-.item {
+.item-wrapper {
     border: 2px solid white;
     border-radius: 3px;
     margin: 5px auto 5px;
@@ -77,28 +93,25 @@ body {
     width: 10px;
     border: 2px solid;
     border-radius: 3px;
-    top: -65;
-    position: relative;
+    position: absolute;
 }
 
 .blue-engine {
-    float: left;
     background-color: navy;
     border-color: navy;
 }
 
 .blue-car {
-    float: right;
+    right: 0;
     border-color: navy;
 }
 
 .gold-engine {
-    float: left;
     background-color: gold;
     border-color: gold;
 }
 
 .gold-car {
-    float: right;
+    right: 0;
     border-color: gold;
 }

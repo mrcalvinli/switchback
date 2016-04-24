@@ -54,6 +54,180 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
+    var setPosition = instMethods.setPosition = function(x,y) {
+        var dx = x - hexagon.translation.x;
+        var dy = y - hexagon.translation.y;
+        hexagon.translation.x=x;
+        hexagon.translation.y=y;
+        for (var i = 0; i < 3; i++){
+            if (linePaths[i] !== null)
+                linePaths[i].translate(dx,dy);
+        }
+        for (var i = 0; i < 6; i++){
+            if (arcPaths[i] !== null)
+                arcPaths[i].translate(dx,dy);
+        }
+        if (train !== null)
+            train.translate(dx,dy);
+        two.update();
+    }
+
+    var copy = instMethods.copy = function(){
+        var newHex = new Hexagon(two, hexagon.translation.x, hexagon.translation.y, radius);
+        for (var i = 0; i<3; i++){
+            if (linePaths[i] !== null){
+                newHex.drawLineTrack(i, (i+3)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if (Math.abs(e1-e2) === 3 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                    newHex.getTracks()[0]);
+                }
+            }
+        }
+        
+        for (var i = 0; i<6; i++){
+            if (arcPaths[i] !== null){
+                newHex.drawArcTrack(i, (i+2)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if ((e1-e2)%2 === 0 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                        newHex.getTracks()[0]);
+                }
+            }
+        }
+        two.update();
+        
+        
+        return newHex;
+    };
+
+    var echo = instMethods.echo = function(hex){
+        hex.removeLines();
+        for (var i = 0; i<3; i++){
+            if (linePaths[i] !== null){
+                hex.drawLineTrack(i, (i+3)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if (Math.abs(e1-e2) === 3 && e1 === i) {
+                    hex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                    hex.getTracks()[0]);
+                }
+            }
+        }
+        
+        for (var i = 0; i<6; i++){
+            if (arcPaths[i] !== null){
+                hex.drawArcTrack(i, (i+2)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if ((e1-e2)%2 === 0 && e1 === i) {
+                    hex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                        hex.getTracks()[0]);
+                }
+            }
+        }
+        two.update();
+
+    };
+
+    var rotateLeft = instMethods.rotateLeft = function(){
+        dir = -1;
+        var newHex = new Hexagon(two, hexagon.translation.x, hexagon.translation.y, radius);
+        for (var i = 0; i<3; i++){
+            if (linePaths[i] !== null){
+                newHex.drawLineTrack((i+dir+6)%6, (i+3+dir)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if (Math.abs(e1-e2) === 3 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                    newHex.getTracks()[0]);
+                }
+            }
+        }
+        
+        for (var i = 0; i<6; i++){
+            if (arcPaths[i] !== null){
+                newHex.drawArcTrack((i+dir+6)%6, (i+2+dir)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if ((e1-e2)%2 === 0 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                        newHex.getTracks()[0]);
+                }
+            }
+        }
+
+        newHex.echo(this);
+        newHex.remove();
+        two.update(); 
+    }
+
+    var rotateRight = instMethods.rotateRight = function(){
+        dir = 1;
+        var newHex = new Hexagon(two, hexagon.translation.x, hexagon.translation.y, radius);
+        for (var i = 0; i<3; i++){
+            if (linePaths[i] !== null){
+                newHex.drawLineTrack((i+dir)%6, (i+3+dir)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if (Math.abs(e1-e2) === 3 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                    newHex.getTracks()[0]);
+                }
+            }
+        }
+        
+        for (var i = 0; i<6; i++){
+            if (arcPaths[i] !== null){
+                newHex.drawArcTrack((i+dir)%6, (i+2+dir)%6);
+            }
+            if (train !== null){
+                var e1 = train.getPath().getStartEdge();
+                var e2 = train.getPath().getEndEdge();
+                if ((e1-e2)%2 === 0 && e1 === i) {
+                    newHex.draw({train: true, 
+                        color: train.color, 
+                        engine: train.isEngine},0,
+                        newHex.getTracks()[0]);
+                }
+            }
+        }
+
+        newHex.echo(this);
+        newHex.remove();
+        two.update(); 
+    }
+
     /**
      * Checks if there exists a track (straight or arc) from edge1 to edge2.
      * 
@@ -77,6 +251,10 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
         return false;
     };
+
+    var hasTrain = instMethods.hasTrain = function(){
+        return train !== null;
+    }
 
     /**
      * Gets a sorted list of adjacent edge indices for those that are connected
@@ -134,7 +312,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             drawArcTrack(e1, e2);
         }
         else if (item.train){
-            if (edge != null){
+            if (edge !== null && edge !== undefined){
                 drawTrain(edge, item.color, item.engine);
             }
         }
@@ -158,6 +336,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
             var line = drawLine(smallerEdge, largerEdge);
             linePaths[smallerEdge] = Path(two, line, smallerEdge, largerEdge);
+            if (train !== null){
+                redrawTrain();
+            }
         } else {
             console.error("Edges must be opposite from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -171,6 +352,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
      * @param edge2 - edge index of the other vertex of the arc
      */
     var drawArcTrack = instMethods.drawArcTrack = function(edge1, edge2) {
+        //console.log(edge1+", "+edge2);
         if (doesTrackExist(edge1, edge2)) {
             return;
         }
@@ -185,6 +367,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
             var arc = makeArc(startEdge, endEdge);
             arcPaths[startEdge] = Path(two, arc, startEdge, endEdge);
+            if (train !== null){
+                redrawTrain();
+            }
         } else {
             console.error("Edges must be two edges apart from each other; given (" + edge1 + ", " + edge2 + ")");
         }
@@ -204,14 +389,15 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
-        for (var i = 0; i < 3; i++){
-            if (linePaths[i] !== null)
-                tracks.push(linePaths[i]);
-        }
-        for (var i = 0; i < 6; i++){
+        for (var i = 5; i >= 0; i--){
             if (arcPaths[i] !== null)
                 tracks.push(arcPaths[i]);
         }
+        for (var i = 2; i >=0; i--){
+            if (linePaths[i] !== null)
+                tracks.push(linePaths[i]);
+        }
+        
         return tracks;
     };
 
@@ -266,7 +452,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     };
 
     var getPosition = instMethods.getPosition = function(){
-        return {x: xCenter, y: yCenter};
+        return {x: hexagon.translation.x, y: hexagon.translation.y};
     };
 
     var getPositionIndex = instMethods.getPositionIndex = function() {
@@ -278,12 +464,11 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         two.update();
     };
 
-    var rotate = instMethods.rotate = function(angle){
-        hexagon.rotation = angle;
-        two.update();
-    };
-
     //====== Private Methods ==============
+
+    var rotate = function(dir){
+       
+    };
 
     var drawLine = function(edge1, edge2) {
         var edgeCenter1 = getSideCoord(edge1);
@@ -295,6 +480,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         return line;
     }
 
+    var redrawTrain = function() {
+        newTrain = Train(two, train.getPath(), train.color, train.isEngine);
+        removeTrain();
+        train = newTrain;
+        two.update();
+    }
+    
     var translateOnCurve = function(path, t, obj) {
         path.getPointAt(t, obj.translation);
         obj.translation.addSelf(path.translation);
@@ -313,9 +505,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         var edgeCenter2 = getSideCoord(edge2);
 
         var anchor1 = new Two.Anchor(edgeCenter1.x, edgeCenter1.y, 0, 0, 
-            .75*(xCenter - edgeCenter1.x), .75*(yCenter - edgeCenter1.y), Two.Commands.curve);
+            .75*(hexagon.translation.x - edgeCenter1.x), .75*(hexagon.translation.y - edgeCenter1.y), Two.Commands.curve);
         var anchor2 = new Two.Anchor(edgeCenter2.x, edgeCenter2.y, 
-            (xCenter - edgeCenter2.x)*.75, .75*(yCenter - edgeCenter2.y), 0, 0, Two.Commands.curve);
+            (hexagon.translation.x - edgeCenter2.x)*.75, .75*(hexagon.translation.y - edgeCenter2.y), 0, 0, Two.Commands.curve);
 
         var path = two.makeCurve([anchor1, anchor2], true);
        
@@ -333,8 +525,8 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         var dy = distToEdge * Math.sin(angleFromCenter);
 
         return {
-            x: xCenter + dx,
-            y: yCenter + dy,
+            x: hexagon.translation.x + dx,
+            y: hexagon.translation.y + dy,
             theta: angleFromCenter
         }
     }

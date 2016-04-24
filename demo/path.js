@@ -36,6 +36,11 @@ var Path = function(two, path, edge1, edge2) {
         obj.translation.addSelf(path.translation);
     }
 
+    var translate = function(dx, dy){
+        path.translation.x+=dx;
+        path.translation.y+=dy;
+    }
+
     //====== Initialization ===============
     var init = (function() {
 
@@ -46,6 +51,7 @@ var Path = function(two, path, edge1, edge2) {
         getStartEdge:getStartEdge,
         getEndEdge: getEndEdge,
         translateOnCurve: translateOnCurve,
+        translate: translate,
         calcDerivAt: calcDerivAt,
         remove: remove
     };
