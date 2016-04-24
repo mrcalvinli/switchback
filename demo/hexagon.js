@@ -155,30 +155,30 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             if (linePaths[i] !== null){
                 newHex.drawLineTrack((i+dir+6)%6, (i+3+dir)%6);
             }
-            if (train !== null){
-                var e1 = train.getPath().getStartEdge();
-                var e2 = train.getPath().getEndEdge();
-                if (Math.abs(e1-e2) === 3 && e1 === i) {
-                    newHex.draw({train: true, 
-                        color: train.color, 
-                        engine: train.isEngine},0,
-                    newHex.getTracks()[0]);
-                }
-            }
         }
         
         for (var i = 0; i<6; i++){
             if (arcPaths[i] !== null){
                 newHex.drawArcTrack((i+dir+6)%6, (i+2+dir)%6);
             }
-            if (train !== null){
-                var e1 = train.getPath().getStartEdge();
-                var e2 = train.getPath().getEndEdge();
-                if ((e1-e2)%2 === 0 && e1 === i) {
+        }
+        if (train !== null){
+            var e1 = train.getPath().getStartEdge();
+            var e2 = train.getPath().getEndEdge();
+            e1 = (e1 + 5)%6;
+            e2 = (e2 + 5)%6;
+            if ((e1 - e2)===3 && e1 > e2){
+                var temp = e2;
+                e2 = e1;
+                e1 = temp;
+            }
+            var newTracks = newHex.getTracks();
+            for (var i = 0; i < newTracks.length; i++) {
+                if (newTracks[i].getStartEdge() === e1 && newTracks[i].getEndEdge() === e2){
                     newHex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                        newHex.getTracks()[0]);
+                    newHex.getTracks()[i]); 
                 }
             }
         }
@@ -195,30 +195,30 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             if (linePaths[i] !== null){
                 newHex.drawLineTrack((i+dir)%6, (i+3+dir)%6);
             }
-            if (train !== null){
-                var e1 = train.getPath().getStartEdge();
-                var e2 = train.getPath().getEndEdge();
-                if (Math.abs(e1-e2) === 3 && e1 === i) {
-                    newHex.draw({train: true, 
-                        color: train.color, 
-                        engine: train.isEngine},0,
-                    newHex.getTracks()[0]);
-                }
-            }
         }
         
         for (var i = 0; i<6; i++){
             if (arcPaths[i] !== null){
                 newHex.drawArcTrack((i+dir)%6, (i+2+dir)%6);
             }
-            if (train !== null){
-                var e1 = train.getPath().getStartEdge();
-                var e2 = train.getPath().getEndEdge();
-                if ((e1-e2)%2 === 0 && e1 === i) {
+        }
+        if (train !== null){
+            var e1 = train.getPath().getStartEdge();
+            var e2 = train.getPath().getEndEdge();
+            e1 = (e1 + 1)%6;
+            e2 = (e2 + 1)%6;
+            if ((e1 - e2)===3 && e1 > e2){
+                var temp = e2;
+                e2 = e1;
+                e1 = temp;
+            }
+            var newTracks = newHex.getTracks();
+            for (var i = 0; i < newTracks.length; i++) {
+                if (newTracks[i].getStartEdge() === e1 && newTracks[i].getEndEdge() === e2){
                     newHex.draw({train: true, 
                         color: train.color, 
                         engine: train.isEngine},0,
-                        newHex.getTracks()[0]);
+                    newHex.getTracks()[i]); 
                 }
             }
         }
