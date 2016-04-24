@@ -190,6 +190,18 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
+    var drawTrain = instMethods.drawTrain = function(edge, color, engine){
+        if (train != null){
+            removeTrain();
+        }
+        train = Train(two,edge,color,engine);
+        //console.log(arcPaths[e1].getPointAt(0.5));
+        //console.log(linePaths[e1].translation);
+
+        //train.edge = e1;
+        two.update();
+    }
+
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
         for (var i = 0; i < 3; i++){
@@ -281,18 +293,6 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         two.update();
 
         return line;
-    }
-
-    var drawTrain = function(edge, color, engine){
-        if (train != null){
-            removeTrain();
-        }
-        train = Train(two,edge,color,engine);
-        //console.log(arcPaths[e1].getPointAt(0.5));
-        //console.log(linePaths[e1].translation);
-
-        //train.edge = e1;
-        two.update();
     }
 
     var translateOnCurve = function(path, t, obj) {

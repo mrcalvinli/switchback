@@ -16,3 +16,17 @@ GameBoardUtil.getHexCenter = function(xIndex, yIndex, radius) {
         y: 1.5*yIndex*radius
     }
 }
+
+/**
+ * Gets the board size dimensions in pixels
+ *
+ * @param numHorizontal - number of hexagons horizontally
+ * @param numVertical - number of hexagons vertically
+ * @param radius - radius of hexagons
+ */
+GameBoardUtil.getBoardSize = function(numHorizontal, numVertical, radius) {
+    return {
+        width: (radius*Math.sqrt(3))*(numHorizontal - 0.5),
+        height: 1.5*radius*(numVertical - 1)
+    }
+}

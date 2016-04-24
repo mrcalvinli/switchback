@@ -9,10 +9,14 @@ var GameBoard = function(two, gameboardJSON) {
     var NUM_VERTICAL_HEX;
 
     /**
-     * 2D array of board, a list of lists of hexagons, where the inner list refers
-     * to the hexagons (in order) in the row.
+     * Map of hexagon ID to hexagon object
      */
-    var hexagons = [];
+    var hexagonMap = [];
+
+    /**
+     * Holds which hexagon is clicked on
+     */
+    var selected_hex = null;
 
     //====== Public Methods ===================
 
@@ -38,16 +42,14 @@ var GameBoard = function(two, gameboardJSON) {
      */
     var createHexagonsOnBoard = function(hexagonsJSON) {
         for (var i = 0; i < NUM_VERTICAL_HEX; i++) {
-            var hexagonRow = [];
             for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
                 // Create hexagon
                 var hexJSON = hexagonsJSON[i][j];
                 var hexagon = createHexagon(hexJSON, j, i);
 
-                // Add to row
-                hexagonRow.push(hexagon);
+                // Add to map
+                hexagonMap[hexagon.getId()] = hexagon;
             }
-            hexagons.push(hexagonRow);
         }
     }
 
@@ -62,6 +64,9 @@ var GameBoard = function(two, gameboardJSON) {
         // Create hexagon
         var hexCenter = GameBoardUtil.getHexCenter(xIndex, yIndex, RADIUS);
         var hexagon = Hexagon(two, hexCenter.x, hexCenter.y, RADIUS, xIndex, yIndex);
+
+        // Add event handlers to hexagon
+        addHexagonEventHandlers(hexagon);
 
         if (hexJSON === null) {
             return hexagon;
@@ -86,8 +91,41 @@ var GameBoard = function(two, gameboardJSON) {
         }
 
         // TODO: add train logic!
+        if (hexJSON.train === true) {
+            var track = hexagon.getTracks()[0];
+            hexagon.drawTrain(track, 'gold', true);
+        }
 
         return hexagon;
+    }
+
+    /**
+     * Adding event handlers to hexagon
+     *
+     * @param hexagon
+     */
+    var addHexagonEventHandlers = function(hexagon) {
+        var hexagonDOM = $('#' + hexagon.getId());
+        
+        hexagonDOM.hover(function() {
+            hexagon.hoverMode(true);
+        }, function() {
+            hexagon.hoverMode(false);
+        });
+
+        hexagonDOM.on('click', function() {
+            var id = $(this).attr('id');
+            if (id !== selected_hex) {
+                if (selected_hex !== null)
+                    hexagonMap[selected_hex].clickedMode(false);
+                selected_hex = id;
+                hexagonMap[id].clickedMode(true);
+            } else {
+                hexagonMap[selected_hex].clickedMode(false);
+                selected_hex = null;
+            }
+            two.update();
+        });
     }
 
     //====== Initialization ===================
