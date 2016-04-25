@@ -165,16 +165,16 @@ $(document).ready(function() {
                 $(this).addClass('clicked');
                 $("#drawCanvas").bind('mousemove', itemSelectMouseHandler);
                 $("#drawCanvas").on('mousedown', function(e) {
-                    if (selected_item === 'erase' || selected_item === 'rotate'){
-                        return;
-                    }
+                    
                     var id = getHexObjFromPos(e.pageX,e.pageY).getId();
                     if (id !== selected_hex){
                         ;
                         $('#'+id).click();
                     }
                     //mouse.setPosition(hexagonMap[id].x,hexagonMap[id].y);
-                    
+                    if (selected_item === 'erase' || selected_item === 'rotate'){
+                        return;
+                    }
                     if (selected_item === 'copy'){
                         mouse.remove();
                         copiedHex = hexagonMap[selected_hex].copy();
