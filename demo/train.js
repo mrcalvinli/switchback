@@ -76,7 +76,8 @@ var Train = function(two, path, color, engine) {
         setPath: setPath,
         getPath: getPath,
         color: type,
-        translate: translate
+        translate: translate,
+        train: train
 
     };
 }

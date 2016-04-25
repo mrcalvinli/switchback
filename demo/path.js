@@ -34,6 +34,10 @@ var Path = function(two, path, edge1, edge2) {
     var translateOnCurve = function(t, obj){
         path.getPointAt(t, obj.translation);
         obj.translation.addSelf(path.translation);
+
+        //set obj's angle
+        var deriv = calcDerivAt(t)
+        obj.rotation = Math.atan2(deriv.dy, deriv.dx);
     }
 
     var translate = function(dx, dy){

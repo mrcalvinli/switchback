@@ -1,11 +1,11 @@
 /**
  * Object for finding paths from one hexagon to another. 
  * 
- * @param hexagonMap - maps two.js ID to a hexagon object in grid
+ * @param hexagonLocMap - maps location index (e.g '(x,y)') to a hexagon object in grid
  * @param params - an object of parameters for the RADIUS, NUM HORIZONTAL
  *                  HEXAGON, NUM VERTICAL HEXAGON
  */
-var PathFinding = function(hexagonMap, params) {
+var PathFinding = function(hexagonLocMap, params) {
 
     var RADIUS = params.RADIUS;
     var NUM_HORIZONTAL_HEX = params.NUM_HORIZONTAL_HEX;
@@ -23,10 +23,12 @@ var PathFinding = function(hexagonMap, params) {
      */
     var HexNode = function(hexagon, startEdge, steps, estimatedDistance, parentNode) {
 
+        var instMethods = {};
+
         /**
          * Return hexagon of the node
          */
-        var getHexagon = function() {
+        var getHexagon = instMethods.getHexagon = function() {
             return hexagon;
         }
 
@@ -34,7 +36,7 @@ var PathFinding = function(hexagonMap, params) {
          * Get starting edge in hexagon to do path-finding (i.e. from
          * from starting edge to adjacent edge, connected by a path)
          */
-        var getStartEdge = function() {
+        var getStartEdge = instMethods.getStartEdge = function() {
             return startEdge;
         }
 
@@ -42,7 +44,7 @@ var PathFinding = function(hexagonMap, params) {
          * Get number of hexagons (or equivalent paths) taken from 
          * starting hexagon
          */
-        var getSteps = function() {
+        var getSteps = instMethods.getSteps = function() {
             return steps;
         }
 
@@ -50,24 +52,18 @@ var PathFinding = function(hexagonMap, params) {
          * Get shortest estimated distance from starting hexagon to end hexagon
          * going through this hexagon 
          */
-        var getEstDist = function() {
+        var getEstDist = instMethods.getEstDist = function() {
             return estimatedDistance;
         }
 
         /**
          * Gets the parent node
          */
-        var getParentNode = function() {
+        var getParentNode = instMethods.getParentNode = function() {
             return parentNode;
         }
 
-        return {
-            getHexagon: getHexagon,
-            getStartEdge: getStartEdge,
-            getSteps: getSteps,
-            getEstDist: getEstDist,
-            getParentNode: getParentNode
-        }
+        return instMethods;
     }
 
     /**
@@ -164,21 +160,23 @@ var PathFinding = function(hexagonMap, params) {
         }
     }
     
-    // Public Methods
+    //====== Public Methods ===================
+
+    var instMethods = {};
 
     /**
      * Find shortest path from one hexagon to another
      * TODO: implement direction of train
      */
-    var shortestPath = function(startHexagon, endHexagon) {
+    var shortestPath = instMethods.shortestPath = function(startHexagon, endHexagon) {
         //Initialize priority queue
         var priorityQueue = PriorityQueue();
 
         //Put first hexagon node (after the startHexagon) into priority queue
         //TODO: make head of engine an input
-        var startHexNode = HexNode(startHexagon, 0, 1, heuristic(startHexagon, endHexagon))
+        var startHexNode = HexNode(startHexagon, 2, 1, heuristic(startHexagon, endHexagon))
         var nextHexagon = getAdjacentHexagons(startHexagon)[5]
-        var nextHexNode = HexNode(nextHexagon, 3, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
+        var nextHexNode = HexNode(nextHexagon, 2, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
         priorityQueue.add(nextHexNode);
 
         while (priorityQueue.size() > 0) {
@@ -188,30 +186,38 @@ var PathFinding = function(hexagonMap, params) {
             var steps = node.getSteps();
 
             //end condition
-            if (hexagon.getId() === endHexagon.getId()) {
-                return;
+            var adjacentEdges = hexagon.adjacentEdges(startEdge);
+            if (hexagon.getId() === endHexagon.getId() && adjacentEdges.length > 0) {
+                var endEdge = adjacentEdges[0];
                 var currNode = node;
                 var hexIdPath = []
                 while (currNode !== undefined) {
-                    hexIdPath.push(currNode.getHexagon().getId());
+                    //push node into list
+                    var hexagonId = currNode.getHexagon().getId();
+                    var startEdge = currNode.getStartEdge();
+                    hexIdPath.push(PathNode(hexagonId, startEdge, endEdge));
+
+                    //adjust variables
+                    endEdge = (currNode.getStartEdge() + 3) % 6;
                     currNode = currNode.getParentNode();
                 }
                 return hexIdPath.reverse();
             }
 
             //get children
-            var adjacentEdges = hexagon.adjacentEdges(startEdge);
             var adjacentHexs = getAdjacentHexagons(hexagon);
             for (var i = 0; i < adjacentEdges.length; i++) {
                 var adjacentEdge = adjacentEdges[i];
                 var adjacentHex = adjacentHexs[adjacentEdge]
-                var nextEdge = (adjacentEdge + 3) % 6;
-                var newSteps = steps + 1;
-                var newEstDist = newSteps + heuristic(adjacentHex, endHexagon);
+                if (adjacentHex !== undefined) {
+                    var nextEdge = (adjacentEdge + 3) % 6;
+                    var newSteps = steps + 1;
+                    var newEstDist = newSteps + heuristic(adjacentHex, endHexagon);
 
-                //add children into heap
-                var childNode = HexNode(adjacentHex, nextEdge, newSteps, newEstDist, node);
-                priorityQueue.add(childNode);
+                    //add children into heap
+                    var childNode = HexNode(adjacentHex, nextEdge, newSteps, newEstDist, node);
+                    priorityQueue.add(childNode);
+                }
             }
 
         }
@@ -264,8 +270,8 @@ var PathFinding = function(hexagonMap, params) {
                 var y_new = positionIndex.yIndex + dy;
 
                 if (x_new >= 0 && x_new < NUM_HORIZONTAL_HEX && y_new >= 0 && y_new < NUM_VERTICAL_HEX) {
-                    var newHexagonId = hexagonId + new_dx + dy * NUM_HORIZONTAL_HEX;
-                    adjacentHexagonList.push(hexagonMap["two_" + newHexagonId]);
+                    var newHexLoc = '(' + x_new + ',' + y_new + ')';
+                    adjacentHexagonList.push(hexagonLocMap[newHexLoc]);
                 } else {
                     adjacentHexagonList.push(null);
                 }
@@ -287,7 +293,32 @@ var PathFinding = function(hexagonMap, params) {
 
     })();
 
-    return {
-        shortestPath: shortestPath
-    };
+    return instMethods;
+}
+
+/**
+ * A representation of the path a train takes on a hexagon, from start 
+ * edge to end edge.
+ *
+ * @param hexId - hexagon ID for train to go on
+ * @param startEdge - edge index of start point of path
+ * @param endEdge - edge index of end point of path 
+ */
+var PathNode = function(hexId, startEdge, endEdge) {
+
+    var instMethods = {};
+
+    var getHexId = instMethods.getHexId = function() {
+        return hexId;
+    }
+
+    var getStartEdge = instMethods.getStartEdge = function() {
+        return startEdge;
+    }
+
+    var getEndEdge = instMethods.getEndEdge = function() {
+        return endEdge;
+    }
+
+    return instMethods;
 }

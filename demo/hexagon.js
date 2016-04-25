@@ -387,6 +387,30 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         two.update();
     }
 
+    /**
+     * Get the track from edge1 to edge2 if it exists. If it doesn't, 
+     * return null
+     *
+     * @param edge1, edge2 - edges connected to create track
+     */
+    var getTrack = instMethods.getTrack = function(edge1, edge2) {
+        // Check straight line tracks
+        if (Math.abs(edge1 - edge2) === 3) {
+            var minEdgeIndex = Math.min(edge1, edge2);
+            return linePaths[minEdgeIndex];
+        }
+        // Check arc tracks
+        else if (Math.abs(edge1 - edge2) % 2 === 0 && edge1 !== edge2) {
+            var arcEdgeIndex = edge1;
+            if ((edge1 - edge2 + 6) % 6 === 2) {
+                arcEdgeIndex = edge2;
+            }
+            return arcPaths[arcEdgeIndex];
+        }
+
+        return null;
+    }
+
     var getTracks = instMethods.getTracks = function(){
         var tracks = [];
         for (var i = 5; i >= 0; i--){
@@ -400,6 +424,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         
         return tracks;
     };
+
+    /** 
+     * Gets the train, if exists, else null
+     */
+    var getTrain = instMethods.getTrain = function() {
+        return train;
+    }
 
     var removePath = instMethods.removePath = function(edge1, edge2) {
         if (edge1 > edge2) {
@@ -486,7 +517,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         train = newTrain;
         two.update();
     }
-    
+
     var translateOnCurve = function(path, t, obj) {
         path.getPointAt(t, obj.translation);
         obj.translation.addSelf(path.translation);
