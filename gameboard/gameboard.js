@@ -40,6 +40,7 @@ var GameBoard = function(two, gameboardJSON) {
         NUM_VERTICAL_HEX = gameboardJSON['numVertical'];
 
         createHexagonsOnBoard(gameboardJSON['hexagons']);
+        addTrainsOnBoard(gameboardJSON['trains'])
     };
 
     /**
@@ -98,13 +99,23 @@ var GameBoard = function(two, gameboardJSON) {
             hexagon.drawArcTrack(startEdge, endEdge);
         }
 
-        // TODO: add train logic!
-        if (hexJSON.train === true) {
-            var track = hexagon.getTracks()[0];
-            hexagon.drawTrain(track, 'gold', true);
-        }
-
         return hexagon;
+    }
+
+    /**
+     * Adds trains onto the gameboard
+     *
+     * @param trainJSON - JSON of train list extracted from gameboard
+     */
+    var addTrainsOnBoard = function(trainsJSON) {
+        for (var i = 0; i < trainsJSON.length; i++) {
+            var trainJSON = trainsJSON[i];
+            var hexLoc = '(' + trainJSON.hexagonCoord.x + ',' + trainJSON.hexagonCoord.y + ')';
+            var hexagon = hexagonLocMap[hexLoc];
+            var track = hexagon.getTrack(trainJSON.edges.start, trainJSON.edges.end);
+
+            hexagon.drawTrain(track, trainJSON.color, trainJSON.engine);
+        }
     }
 
     /**
@@ -141,24 +152,27 @@ var GameBoard = function(two, gameboardJSON) {
                 var startHex = hexagonIdMap[startHexId];
                 var endHex = hexagonIdMap[endHexId];
 
-                var params = {
-                    RADIUS: RADIUS,
-                    NUM_HORIZONTAL_HEX: NUM_HORIZONTAL_HEX,
-                    NUM_VERTICAL_HEX: NUM_VERTICAL_HEX
-                };
-                var pathfinding = PathFinding(hexagonLocMap, params);
-
-                var shortestPathNodes = pathfinding.shortestPath(startHex, endHex);
-
-                // Deselect start hex
-                hexagonIdMap[startHexId].clickedMode(false);
+                startHex.clickedMode(false);
 
                 // Set all back to null
                 startHexId = null;
                 endHexId = null;
 
-                //TODO MOVE TRAIN
-                moveTrainsOnPath(shortestPathNodes, startHex);
+                if (startHex.getTrain() !== null) {
+                    var params = {
+                        RADIUS: RADIUS,
+                        NUM_HORIZONTAL_HEX: NUM_HORIZONTAL_HEX,
+                        NUM_VERTICAL_HEX: NUM_VERTICAL_HEX
+                    };
+                    var train = startHex.getTrain();
+                    var trainTrack = train.getPath();
+                    var pathfinding = PathFinding(hexagonLocMap, params);
+
+                    var shortestPathNodes = pathfinding.shortestPath(startHex, endHex, trainTrack);
+                    
+                    //Move train
+                    moveTrainsOnPath(shortestPathNodes, startHex);
+                }
             }
         });
     }
@@ -176,8 +190,9 @@ var GameBoard = function(two, gameboardJSON) {
         var train = startHex.getTrain().train;
         var track = listTracks[i];
         var pathDirection = getPathDirection(pathNodes[i]);
-        var bound = pathDirection === 1 ? 0.99 : 0.01
-        two.bind('update', function() {
+        var bound = pathDirection === 1 ? 0.99 : 0.01;
+
+        var animateTrain = function() {
             if (pathDirection * (t - bound) < 0) {
                 t += pathDirection*0.01;
             } else if (pathDirection * (t - bound) >= 0 && i < listTracks.length - 1) {
@@ -189,12 +204,24 @@ var GameBoard = function(two, gameboardJSON) {
                 pathDirection = getPathDirection(pathNodes[i]);
                 t = (pathDirection === 1) ? 0.01 : 0.99;
                 bound = (pathDirection === 1) ? 0.99 : 0.01;
+                if (i === listTracks.length - 1) {
+                    bound = 0.5;
+                }
             } else {
                 two.pause();
+                two.unbind('update', animateTrain);
+
+                //reset train to new location
+                var endHexId = pathNodes[pathNodes.length - 1].getHexId();
+                var endHex = hexagonIdMap[endHexId];
+                endHex.drawTrain(track, startHex.getTrain().color, startHex.getTrain().isEngine);
+                startHex.removeTrain();
             }
 
             track.translateOnCurve(t, train);
-        }).play();
+        };
+
+        two.bind('update', animateTrain).play();
     }
 
     /**

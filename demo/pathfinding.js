@@ -166,18 +166,29 @@ var PathFinding = function(hexagonLocMap, params) {
 
     /**
      * Find shortest path from one hexagon to another
-     * TODO: implement direction of train
+     * 
+     * @param startHexagon - starting hexagon
+     * @param endHexagon - ending hexagon
+     * @param startTrack - track (path.js) that train is initially on
      */
-    var shortestPath = instMethods.shortestPath = function(startHexagon, endHexagon) {
+    var shortestPath = instMethods.shortestPath = function(startHexagon, endHexagon, startTrack) {
         //Initialize priority queue
         var priorityQueue = PriorityQueue();
 
-        //Put first hexagon node (after the startHexagon) into priority queue
-        //TODO: make head of engine an input
-        var startHexNode = HexNode(startHexagon, 2, 1, heuristic(startHexagon, endHexagon))
-        var nextHexagon = getAdjacentHexagons(startHexagon)[5]
-        var nextHexNode = HexNode(nextHexagon, 2, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
-        priorityQueue.add(nextHexNode);
+        //Put first forward hexagon node (after the startHexagon) into priority queue
+        var startEdges = [startTrack.getStartEdge(), startTrack.getEndEdge()]
+        for (var i = 0; i < startEdges.length; i++) {
+            var startEdge = startEdges[i];
+            var endEdge = startEdges[1 - i];
+            var startHexNode = HexNode(startHexagon, startEdge, 1, heuristic(startHexagon, endHexagon))
+            var nextHexagon = getAdjacentHexagons(startHexagon)[endEdge]
+            if (nextHexagon !== undefined) {
+                var nextHexNode = HexNode(nextHexagon, (endEdge + 3) % 6, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
+                priorityQueue.add(nextHexNode);
+            }
+        }
+
+        //Put first backward hexagon node (after startHexagon) into priority queue
 
         while (priorityQueue.size() > 0) {
             var node = priorityQueue.pop();
@@ -261,7 +272,7 @@ var PathFinding = function(hexagonLocMap, params) {
             for (var dx = -1; dx < 1; dx++) {
                 var new_dx;
                 if (dy === 0) {
-                    new_dx = dx + (dx + 1)*2;
+                    new_dx = dx + (dx + 1);
                 } else {
                     new_dx = dx + xAdjuster;
                 }

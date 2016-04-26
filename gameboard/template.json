@@ -6,18 +6,24 @@ gameboard: {
         ["hexagon_obj", "...", "hexagon_obj"],
         ["..."],
         ["hexagon_obj", "...", "hexagon_obj"]
-    ]
+    ],
+    "train": ["train_obj", "..."]
 }
 
 hexagon_obj: null || {
     "lineTracks": [0, 2],
     "arcTracks": [0, 1, 3, 4],
-    "train": "train_obj"
 }
 
-train_obj: null || {
-    "edgeA": 0,
-    "edgeB": 1,
+train_obj: {
+    "hexagonCoord": {
+        "x": "xIndex",
+        "y": "yIndex"
+    },
+    "edges": {
+        "start": "edgeIndex",
+        "end": "edgeIndex"
+    },
     "color": "white",
     "engine": true
 }

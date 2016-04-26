@@ -432,6 +432,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         return train;
     }
 
+    /**
+     * Set train to train object (train.js)
+     */
+    var setTrain = instMethods.setTrain = function(newTrain) {
+        train = newTrain;
+    }
+
     var removePath = instMethods.removePath = function(edge1, edge2) {
         if (edge1 > edge2) {
             return removePath(edge2, edge1);

@@ -1,12 +1,31 @@
 {
-    "numHorizontal": 5,
-    "numVertical": 5,
+    "numHorizontal": 10,
+    "numVertical": 10,
     "hexRadius": 30,
     "hexagons": [
-        [null, null, null, null, null], 
-        [null, null, { "lineTracks": [0], "arcTracks": [0, 1], "train": null } , null, null], 
-        [null, null, null, null, null], 
-        [null, null, null, null, null], 
-        [null, null, null, null, null]
+        [null, null, null, null, null, null, null, null, null, null], 
+        [null, null, null , null, null, null, null, null, null, null], 
+        [null, null, null, null, null, null, null, null, null, null], 
+        [null, null, { "lineTracks": [], "arcTracks": [2]}, { "lineTracks": [], "arcTracks": [3]}, null, null, null, null, null, null], 
+        [null, null, { "lineTracks": [1], "arcTracks": []}, null, { "lineTracks": [], "arcTracks": [0, 2]}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}],
+        [{ "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": [5]}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [], "arcTracks": [5]}, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null]
+    ],
+    "trains": [
+        {
+            "hexagonCoord": {
+                "x": 7,
+                "y": 4
+            },
+            "edges": {
+                "start": 2,
+                "end": 5
+            },
+            "color": "gold",
+            "engine": true
+        }
     ]
 }

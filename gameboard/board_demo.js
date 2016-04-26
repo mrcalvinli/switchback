@@ -8,13 +8,27 @@ $(document).ready(function() {
             [null, null, null, null, null, null, null, null, null, null], 
             [null, null, null , null, null, null, null, null, null, null], 
             [null, null, null, null, null, null, null, null, null, null], 
-            [null, null, { "lineTracks": [], "arcTracks": [2], "train": null }, { "lineTracks": [], "arcTracks": [3], "train": null }, null, null, null, null, null, null], 
-            [null, null, { "lineTracks": [1], "arcTracks": [], "train": null }, null, { "lineTracks": [], "arcTracks": [0, 2], "train": null }, { "lineTracks": [2], "arcTracks": [], "train": null }, { "lineTracks": [2], "arcTracks": [], "train": null }, { "lineTracks": [2], "arcTracks": [], "train": null }, { "lineTracks": [2], "arcTracks": [], "train": true }, { "lineTracks": [2], "arcTracks": [], "train": null }],
-            [{ "lineTracks": [2], "arcTracks": [], "train": null }, { "lineTracks": [2], "arcTracks": [5], "train": null }, { "lineTracks": [2], "arcTracks": [], "train": null }, { "lineTracks": [], "arcTracks": [5], "train": null }, null, null, null, null, null, null],
+            [null, null, { "lineTracks": [], "arcTracks": [2]}, { "lineTracks": [], "arcTracks": [3]}, null, null, null, null, null, null], 
+            [null, null, { "lineTracks": [1], "arcTracks": []}, null, { "lineTracks": [], "arcTracks": [0, 2]}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": []}],
+            [{ "lineTracks": [2], "arcTracks": []}, { "lineTracks": [2], "arcTracks": [5]}, { "lineTracks": [2], "arcTracks": []}, { "lineTracks": [], "arcTracks": [5]}, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null, null, null]
+        ],
+        "trains": [
+            {
+                "hexagonCoord": {
+                    "x": 7,
+                    "y": 4
+                },
+                "edges": {
+                    "start": 2,
+                    "end": 5
+                },
+                "color": "gold",
+                "engine": true
+            }
         ]
     }
     var elem = document.getElementById('drawCanvas');
