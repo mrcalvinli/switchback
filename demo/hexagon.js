@@ -28,6 +28,8 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
 
     var train = null;
 
+    var target = null;
+
 
     //====== Public Methods ===============
 
@@ -311,12 +313,27 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
             var e2 = (e1 + 2) % 6;
             drawArcTrack(e1, e2);
         }
+        else if (item.id === "menu-item-targets"){
+            drawTarget(item.color);
+        }
         else if (item.train){
             if (edge !== null && edge !== undefined){
                 drawTrain(edge, item.color, item.engine);
             }
         }
     };
+
+    /**
+     * Draw a target on the hex if there is at least one track present.
+     *
+     * @param color - the color of the target, given in a css ready string
+     */
+    var drawTarget = instMethods.drawTarget = function(color) {
+        //target = new Target(two, xCenter. yCenter, radius, color);
+        target = two.makePolygon(xCenter, yCenter, radius*.75, 6);
+        target.fill = color;
+        two.update();
+    }
 
     /**
      * Draw a straight line track on the hexagon from edge1 to edge2, only if it
@@ -472,7 +489,8 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     };
 
     var remove = instMethods.remove = function(){
-        two.remove(hexagon)
+        two.remove(hexagon);
+        two.remove(target);
         removeLines();
         two.update();
 

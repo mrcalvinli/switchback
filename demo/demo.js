@@ -15,18 +15,33 @@ $(document).ready(function() {
     var mouse = null;
     var copiedHex = null;
 
-    var straight = {id: 'menu-item-straight'};
-    var curved = {id: 'menu-item-curved'};
-    var goldItem = {id: 'menu-item-gold',
-                    color: 'gold',
-                    engine: true,
-                    train: true};
-    var blueItem = {id: 'menu-item-blue',
-                    color: 'navy',
-                    engine: true,
-                    train: true};
-    var lineErase = {id: 'menu-item-erase-line'};
-    var trainErase = {id: 'menu-item-erase-train'};
+    var straightId = "menu-item-straight";
+    var curvedId = "menu-item-curved";
+    var engineId = "menu-item-engine";
+    var carId = "menu-item-car";
+    var obstacleId = "menu-item-obstacle";
+    var targetsId = "menu-item-targets";
+    var targetsCarId = "menu-item-targets-car";
+
+    var straight = {id: straightId};
+    var curved = {id: curvedId};
+    var target = {id: targetsId, color: 'navy'};
+    var engineItem = {id: engineId,
+                      color: 'white',
+                      engine: true,
+                      train: true};
+    var carItem = {id: carId,
+                   color: 'white',
+                   engine: false,
+                   train: true};
+    var obstacleItem = {id: obstacleId,
+                        color: 'black',
+                        engine: false,
+                        train: true};
+    var targetsCarItem = {id: targetsCarId,
+                        color: 'navy',
+                        engine: false,
+                        train: true};
 
     var getHexCenter = function(xIndex, yIndex) {
         return {
@@ -91,18 +106,20 @@ $(document).ready(function() {
     }
 
     var setSelectedItem = function(id){
-        if (id === "menu-item-erase-train")
-            selected_item = trainErase;
-        else if (id === "menu-item-straight")
+        if (id === targetsId)
+            selected_item = target;
+        else if (id === straightId)
             selected_item = straight;
-        else if (id === "menu-item-curved")
+        else if (id === curvedId)
             selected_item = curved;
-        else if (id === "menu-item-erase-line")
-            selected_item = lineErase;
-        else if (id === "menu-item-gold")
-            selected_item = goldItem;
-        else if (id === "menu-item-blue")
-            selected_item = blueItem;
+        else if (id === obstacleId)
+            selected_item = obstacleItem;
+        else if (id === engineId)
+            selected_item = engineItem;
+        else if (id === carId)
+            selected_item = carItem;
+        else if (id === targetsCarId)
+            selected_item = targetsCarItem;
         else
             selected_item = id
     }
@@ -115,16 +132,11 @@ $(document).ready(function() {
             selected_item !== 'rotate' && selected_item !== 'copy') {
             
             mouse = Hexagon(two, e.pageX, e.pageY, RADIUS, 6);
-            if (selected_item.train || 
-                selected_item.id === "menu-item-erase-train"){
+            if (selected_item.train){
                 mouse.draw(straight,0);
             }
             mouse.draw(selected_item, 0, mouse.getTracks()[0]);
             mouse.setFill("rgba(0,0,0,0)");
-            if (selected_item.id === "menu-item-erase-line" || 
-                selected_item.id === "menu-item-erase-train"){
-                mouse.setFill("rgba(255,0,0,.5)");
-            }
         } else {
             var half = two.makeRectangle(e.pageX, e.pageY, 10, 40);
             half.fill = "rgba(255,0,0,.5)";
@@ -144,10 +156,14 @@ $(document).ready(function() {
     function populateMenu() {
         var tracks = $("#tracks");
         var trains = $("#trains");
-        tracks.append("<div class='item-wrapper'><div class='item' id='menu-item-straight'></div></div>");
-        tracks.append("<div class='item-wrapper'><div class='item' id='menu-item-curved'></div></div>");
-        trains.append("<div class='item-wrapper'><div class='item' id='menu-item-gold'></div></div>");
-        trains.append("<div class='item-wrapper'><div class='item' id='menu-item-blue'></div></div>");
+        var targets = $("#targets");
+        tracks.append("<div class='item-wrapper'><div class='item' id='"+straightId+"''></div></div>");
+        tracks.append("<div class='item-wrapper'><div class='item' id='"+curvedId+"'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='"+engineId+"'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='"+carId+"'></div></div>");
+        trains.append("<div class='item-wrapper'><div class='item' id='"+obstacleId+"'></div></div>");
+        targets.append("<div class='item-wrapper'><div class='item' id='"+targetsId+"'></div></div>");
+        targets.append("<div class='item-wrapper'><div class='item' id='"+targetsCarId+"'></div></div>");
         $(".item").on('click', function() {
             var id = $(this).attr('id');
             console.log(id);
@@ -244,15 +260,9 @@ $(document).ready(function() {
                     var tracks = hexagonMap[selected_hex].getTracks();
                         //console.log(tracks);
                     var index = Math.floor((theta+179)/(360/tracks.length));
+
+                    hexagonMap[selected_hex].draw(selected_item,theta,tracks[index]);
                     
-                    if (selected_item.id === 'menu-item-erase-line'){
-                        hexagonMap[selected_hex].removeLines();
-                    } else if (selected_item.id === 'menu-item-erase-train'){
-                        hexagonMap[selected_hex].removeTrain();
-                    }
-                    else{
-                        hexagonMap[selected_hex].draw(selected_item,theta,tracks[index]);
-                    }
 
                     $("#drawCanvas").unbind("mousemove");
                     $("#drawCanvas").bind("mousemove", itemSelectMouseHandler);
@@ -273,32 +283,56 @@ $(document).ready(function() {
                 $("#drawCanvas").unbind('mouseup');
             }
         });
-        var line = $("#menu-item-straight");
+        var line = $("#"+straightId);
         var item_params = {width: 66, height: 66};
         var straightTwo = new Two(item_params).appendTo(line[0]);
         var hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
         hexagon.draw(straight, 0);
 
-        var curve = $("#menu-item-curved");
+        var curve = $("#"+curvedId);
         straightTwo = new Two(item_params).appendTo(curve[0]);
         hexagon = Hexagon(straightTwo, 66/2., 66/2., RADIUS);
         hexagon.draw(curved, 0);
 
-        var gold = $("#menu-item-gold");
-        var goldTwo = new Two(item_params).appendTo(gold[0]);
-        var goldHexagon = Hexagon(goldTwo, 66/2., 66/2., RADIUS);
-        goldHexagon.draw(straight, 0);
-        goldHexagon.draw(goldItem, 0, goldHexagon.getTracks()[0]);
-        goldTwo.update();
+        var engine = $("#"+engineId);
+        var engineTwo = new Two(item_params).appendTo(engine[0]);
+        var engineHexagon = Hexagon(engineTwo, 66/2., 66/2., RADIUS);
+        engineHexagon.draw(straight, 0);
+        engineHexagon.draw(engineItem, 0, engineHexagon.getTracks()[0]);
+        engineTwo.update();
         
 
-        var blue = $("#menu-item-blue");
-        var blueTwo = new Two(item_params).appendTo(blue[0]);
-        var blueHexagon = Hexagon(blueTwo, 66/2., 66/2., RADIUS);
-        blueHexagon.draw(straight, 0);
-        blueHexagon.draw(blueItem, 0, blueHexagon.getTracks()[0]);
-        blueTwo.update();
+        var car = $("#"+carId);
+        var carTwo = new Two(item_params).appendTo(car[0]);
+        var carHexagon = Hexagon(carTwo, 66/2., 66/2., RADIUS);
+        carHexagon.draw(straight, 0);
+        carHexagon.draw(carItem, 0, carHexagon.getTracks()[0]);
+        carTwo.update();
 
+        var obstacle = $("#"+obstacleId);
+        carTwo = new Two(item_params).appendTo(obstacle[0]);
+        var obsHexagon = Hexagon(carTwo, 66/2., 66/2., RADIUS);
+        obsHexagon.draw(straight, 0);
+        obsHexagon.draw(obstacleItem, 0, obsHexagon.getTracks()[0]);
+        carTwo.update();
+
+        var targetDom = $("#"+targetsId);
+        carTwo = new Two(item_params).appendTo(targetDom[0]);
+        var targetHexagon = Hexagon(carTwo, 66/2., 66/2., RADIUS);
+        targetHexagon.draw(straight, 0);
+        targetHexagon.draw(target);
+        carTwo.update();
+
+        var targetCars = $("#"+targetsCarId);
+        carTwo = new Two(item_params).appendTo(targetCars[0]);
+        var tcarHex = Hexagon(carTwo, 66/2., 66/2., RADIUS);
+        tcarHex.draw(straight, 0);
+        tcarHex.draw(targetsCarItem, 0, tcarHex.getTracks()[0]);
+        carTwo.update();
+
+
+
+/*
         gold.before("<div class='gold-engine type-select'></div>"+
                     "<div class='gold-car type-select'></div>");
         blue.before("<div class='blue-engine type-select'></div>"+
@@ -318,7 +352,7 @@ $(document).ready(function() {
         $('.blue-engine').click(function(){
             blueItem.engine = true;
             blueHexagon.draw(blueItem, 0, blueHexagon.getTracks()[0]);
-        });
+        });*/
     }
 
     populateMenu();

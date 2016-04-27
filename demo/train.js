@@ -46,20 +46,23 @@ var Train = function(two, path, color, engine) {
             rect.fill = color;
 
             var triangle = two.makePolygon(10, 0, 8, 3);
+            triangle.fill = "black";
             triangle.rotation = -Math.PI/6;
 
             var group = two.makeGroup(rect, triangle);
             group.translation.set(pos.x, pos.y);
             train = group;
+
         } else {
             var rect = two.makeRoundedRectangle(pos.x, pos.y, 40, 20, 3);
-            rect.stroke = color;
-            rect.noFill();
+            rect.fill = color;
             train = rect;
         }
 
 
-        var deriv = path.calcDerivAt(0.5);
+        currentPath = path;
+        type = color;
+        isEngine = engine;
 
         //train.rotation = Math.atan2(deriv.dy, deriv.dx);
         
@@ -70,6 +73,7 @@ var Train = function(two, path, color, engine) {
         type = color;
         isEngine = engine;
         //train = rect;
+
 
         //console.log(arcLines[e1].getPointAt(0.5));
         //console.log(pathLines[e1].translation);
