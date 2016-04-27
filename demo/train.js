@@ -64,7 +64,8 @@ var Train = function(two, path, color, engine) {
         type = color;
         isEngine = engine;
 
-        //train.rotation = Math.atan2(deriv.dy, deriv.dx);
+        /*var deriv = path.calcDerivAt(.5);
+        train.rotation = Math.atan2(deriv.dy, deriv.dx);*/
         
 
         path.translateOnCurve(0.5, train);

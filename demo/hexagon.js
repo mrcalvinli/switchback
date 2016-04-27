@@ -329,9 +329,9 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
      * @param color - the color of the target, given in a css ready string
      */
     var drawTarget = instMethods.drawTarget = function(color) {
-        //target = new Target(two, xCenter. yCenter, radius, color);
-        target = two.makePolygon(xCenter, yCenter, radius*.75, 6);
-        target.fill = color;
+        target = new Target(two, xCenter, yCenter, radius, color);
+        /*target = two.makePolygon(xCenter, yCenter, radius*.75, 6);
+        target.fill = color;*/
         two.update();
     }
 
@@ -488,9 +488,19 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
+    var removeTarget = instMethods.removeTarget = function(){
+        if (target !== null){
+            target.remove();
+            target = null;
+        }
+        else {
+            //console.log("unable to remove target, reference is null");
+        }
+    }
+
     var remove = instMethods.remove = function(){
         two.remove(hexagon);
-        two.remove(target);
+        removeTarget();
         removeLines();
         two.update();
 
