@@ -39,6 +39,10 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         return hexagonId;
     };
 
+    var getIndices = instMethods.getIndices = function(){
+        return {x: xIndex, y: yIndex};
+    }
+
     var hoverMode = instMethods.hoverMode = function(isHover) {
         if (isHover) {
             hexagonDOM.addClass('hover');

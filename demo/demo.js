@@ -42,6 +42,13 @@ $(document).ready(function() {
                         color: 'navy',
                         engine: false,
                         train: true};
+    var gameboardJson = {
+        "numHorizontal": NUM_HORIZONTAL_HEX,
+        "numVertical": NUM_VERTICAL_HEX,
+        "hexRadius": RADIUS,
+        "hexagons": [],
+        "trains": []
+    };
 
     var getHexCenter = function(xIndex, yIndex) {
         return {
@@ -49,6 +56,100 @@ $(document).ready(function() {
             y: 1.5*yIndex*RADIUS
         }
     }
+
+    var exportToBoardJson = function(){
+        var horiz = 0;
+        var vert = 0;
+        for (var i = 0; i < NUM_VERTICAL_HEX; i++){
+            gameboardJson["hexagons"].push([]);
+            for (var j = 0; j < hexagonArray[i].length; j++){
+                var currentHex = hexagonArray[i][j];
+                var trackList = currentHex.getTracks();
+                if (trackList.length === 0){
+                    gameboardJson["hexagons"][i].push(null);
+                }
+                else {
+                    gameboardJson["hexagons"][i].push({ "lineTracks": [], "arcTracks": []});
+                    for (var t = 0; t < trackList.length; t++){
+                        var e1 = trackList[t].getStartEdge();
+                        var e2 = trackList[t].getEndEdge();
+                        if (Math.abs(e1-e2) === 3){
+                            gameboardJson["hexagons"][i][j]["lineTracks"].push(e1);
+                        }
+                        else{
+                            gameboardJson["hexagons"][i][j]["arcTracks"].push(e1);
+                        }
+                    }
+                    var train = currentHex.getTrain();
+                    if (train !== null){
+                        gameboardJson["trains"].push({
+                                                    "hexagonCoord": {
+                                                        "x": j,
+                                                        "y": i
+                                                    },
+                                                    "edges": {
+                                                        "start": train.getPath().getStartEdge(),
+                                                        "end": train.getPath().getEndEdge()
+                                                    },
+                                                    "color": train.color,
+                                                    "engine": train.isEngine
+                                                });
+                    }
+
+                }
+                $('#'+currentHex.getId()).off('click');
+            }
+        }
+        /*var firstNotNullX = NUM_HORIZONTAL_HEX;
+        var lastNotNullX = 0;
+        var nullY = false;
+        for (var i = hexagonArray.length-1; i >= 0; i--){
+            nullY = true;
+            for (var j = 0; j < hexagonArray[i].length; j++){
+                if (gameboardJson["hexagons"][i][j] !== null){
+                    firstNotNullX = Math.min(firstNotNullX,j);
+                    nullY = false;
+                } else{
+                    lastNotNullX = Math.max(j,lastNotNullX);
+                }
+            }
+            if (nullY){
+                gameboardJson["hexagons"].splice(i,1);
+            }
+        }
+        var numToRemoveX = NUM_HORIZONTAL_HEX - lastNotNullX;
+        console.log(firstNotNullX);
+        for (var i = gameboardJson["hexagons"].length - 1; i >= 0; i--) {
+            console.log(gameboardJson["hexagons"][i]);
+            gameboardJson["hexagons"][i].splice(0,firstNotNullX);
+            gameboardJson["hexagons"][i].splice(lastNotNullX-firstNotNullX,numToRemoveX);
+        };
+        gameboardJson["numHorizontal"] = gameboardJson["hexagons"][0].length;
+        gameboardJson["numVertical"] = gameboardJson["hexagons"].length;*/
+        console.log(gameboardJson);
+    };
+
+    var playBoard = function(){
+        exportToBoardJson();
+
+        two.clear();
+        $("#track-menu").hide();
+
+        params = GameBoardUtil.getBoardSize(gameboardJson.numHorizontal, gameboardJson.numVertical, gameboardJson.hexRadius);
+        //two = new Two(params).appendTo($('#drawCanvas')[0]);
+
+        
+        $("#drawCanvas").off('mousemove');
+        $("#drawCanvas").off('mousedown');
+        $("#drawCanvas").off('click');
+        $("#drawCanvas").unbind('mouseup');
+
+        $('#drawCanvas').css('width', params.width + 'px').css('height', params.height + 'px');
+
+        board = GameBoard(two, gameboardJson);
+        two.update();
+
+    };
 
     var getHexObjFromPos = function(x, y) {
         var leftHexIndexY = Math.floor(y/(RADIUS*1.5));
@@ -330,6 +431,8 @@ $(document).ready(function() {
         tcarHex.draw(targetsCarItem, 0, tcarHex.getTracks()[0]);
         carTwo.update();
 
+        $("#play").click(playBoard);
+
 
 
 /*
@@ -358,7 +461,9 @@ $(document).ready(function() {
     populateMenu();
 
     var hexagonMap = {};
+    var hexagonArray = [];
     for (var i = 0; i <= NUM_VERTICAL_HEX; i++) {
+        hexagonArray.push([]);
         for (var j = 0; j < NUM_HORIZONTAL_HEX; j++) {
 
             var center = getHexCenter(j, i);
@@ -369,6 +474,7 @@ $(document).ready(function() {
             addHexagonEventHandlers(hexagon);
 
             hexagonMap[hexagon.getId()] = hexagon;
+            hexagonArray[i].push(hexagon);
         }
     }
 
