@@ -154,8 +154,8 @@ var GameBoard = function(two, gameboardJSON) {
 
                 startHex.clickedMode(false);
 
-                // Set all back to null
-                startHexId = null;
+                // Set start hexagon to the end
+                startHexId = endHexId;
                 endHexId = null;
 
                 if (startHex.getTrain() !== null) {
@@ -172,6 +172,9 @@ var GameBoard = function(two, gameboardJSON) {
                     
                     //Move train
                     moveTrainsOnPath(shortestPathNodes, startHex);
+                } else {
+                    // No train to move, so deselect everything
+                    startHexId = null;
                 }
             }
         });
@@ -224,6 +227,9 @@ var GameBoard = function(two, gameboardJSON) {
                 var endHex = hexagonIdMap[endHexId];
                 endHex.drawTrain(track, trainObj.color, trainObj.isEngine, trainObj.isFacingForward());
                 startHex.removeTrain();
+
+                //reselect hex
+                endHex.clickedMode(true);
             }
 
             track.translateOnCurve(t, train, trainObj.isFacingForward());
