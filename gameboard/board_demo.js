@@ -26,7 +26,7 @@ $(document).ready(function() {
                     "start": 2,
                     "end": 5
                 },
-                "color": "gold",
+                "color": "white",
                 "engine": true,
                 "isForward": true
             }
