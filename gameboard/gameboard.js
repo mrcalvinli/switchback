@@ -133,12 +133,20 @@ var GameBoard = function(two, gameboardJSON) {
         });
 
         hexagonDOM.on('click', function() {
+            if (two.playing) {
+                console.log('Clicks are useless, train is moving');
+                return;
+            }
+
             var id = $(this).attr('id');
 
             // Check if startHexagon is been selected yet
             if (startHexId === null) {
-                startHexId = id;
-                hexagonIdMap[startHexId].clickedMode(true);
+                var hexagon = hexagonIdMap[id];
+                if (hexagon.getTrain() !== null && hexagon.getTrain().isEngine) {
+                    startHexId = id;
+                    hexagonIdMap[startHexId].clickedMode(true);
+                }
             } 
             // Check if it's deselecting the startHexagon
             else if (id === startHexId) {
@@ -154,6 +162,8 @@ var GameBoard = function(two, gameboardJSON) {
 
                 startHex.clickedMode(false);
 
+                var trainMoving = false;
+
                 // Set start hexagon to the end
                 startHexId = endHexId;
                 endHexId = null;
@@ -167,14 +177,21 @@ var GameBoard = function(two, gameboardJSON) {
                     var train = startHex.getTrain();
                     var trainTrack = train.getPath();
                     var pathfinding = PathFinding(hexagonLocMap, params);
-
-                    var shortestPathNodes = pathfinding.shortestPath(startHex, endHex, trainTrack);
                     
-                    //Move train
-                    moveTrainsOnPath(shortestPathNodes, startHex);
+                    var shortestPathNodes = pathfinding.shortestPath(startHex, endHex, trainTrack);
+                    if (shortestPathNodes !== undefined) {
+                        //Move train
+                        trainMoving = true;
+                        moveTrainsOnPath(shortestPathNodes, startHex);
+                    }
+                }
+
+                if (trainMoving) {
+                    startHexId = endHexId;
+                    endHexId = null;
                 } else {
-                    // No train to move, so deselect everything
                     startHexId = null;
+                    endHexId = null;
                 }
             }
         });
@@ -229,7 +246,12 @@ var GameBoard = function(two, gameboardJSON) {
                 startHex.removeTrain();
 
                 //reselect hex
-                endHex.clickedMode(true);
+                if (startHexId !== null && startHexId !== endHexId) {
+                    console.log("hi");
+                    hexagonIdMap[startHexId].clickedMode(false);
+                }
+                startHexId = endHexId;
+                hexagonIdMap[startHexId].clickedMode(true);
             }
 
             track.translateOnCurve(t, train, trainObj.isFacingForward());
