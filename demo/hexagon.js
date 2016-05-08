@@ -392,11 +392,11 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
-    var drawTrain = instMethods.drawTrain = function(edge, color, engine){
+    var drawTrain = instMethods.drawTrain = function(edge, color, engine, isForward){
         if (train != null){
             removeTrain();
         }
-        train = Train(two,edge,color,engine);
+        train = Train(two,edge,color,engine, isForward);
         //console.log(arcPaths[e1].getPointAt(0.5));
         //console.log(linePaths[e1].translation);
 
@@ -547,7 +547,7 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
     }
 
     var redrawTrain = function() {
-        newTrain = Train(two, train.getPath(), train.color, train.isEngine);
+        newTrain = Train(two, train.getPath(), train.color, train.isEngine, train.isFacingForward());
         removeTrain();
         train = newTrain;
         two.update();

@@ -114,7 +114,7 @@ var GameBoard = function(two, gameboardJSON) {
             var hexagon = hexagonLocMap[hexLoc];
             var track = hexagon.getTrack(trainJSON.edges.start, trainJSON.edges.end);
 
-            hexagon.drawTrain(track, trainJSON.color, trainJSON.engine);
+            hexagon.drawTrain(track, trainJSON.color, trainJSON.engine, trainJSON.isForward);
         }
     }
 
@@ -187,23 +187,31 @@ var GameBoard = function(two, gameboardJSON) {
 
         var t = 0.5;
         var i = 0;
-        var train = startHex.getTrain().train;
+        var trainObj = startHex.getTrain();
+        var train = trainObj.train;
         var track = listTracks[i];
         var pathDirection = getPathDirection(pathNodes[i]);
-        var bound = pathDirection === 1 ? 0.99 : 0.01;
+        var dirFactor = pathDirection ? 1 : -1;
+        var trainDirection = pathDirection === trainObj.isFacingForward();
+        var bound = pathDirection ? 0.99 : 0.01;
 
         var animateTrain = function() {
-            if (pathDirection * (t - bound) < 0) {
-                t += pathDirection*0.01;
-            } else if (pathDirection * (t - bound) >= 0 && i < listTracks.length - 1) {
+            if (dirFactor * (t - bound) < 0) {
+                t += dirFactor*0.01;
+            } else if (dirFactor * (t - bound) >= 0 && i < listTracks.length - 1) {
                 // Set new track
                 i++;
                 track = listTracks[i];
 
-                // Reset where on the curve on for train to be
+                // Set direction of train
                 pathDirection = getPathDirection(pathNodes[i]);
-                t = (pathDirection === 1) ? 0.01 : 0.99;
-                bound = (pathDirection === 1) ? 0.99 : 0.01;
+                dirFactor = pathDirection ? 1 : -1;
+                trainObj.setFacingDirection(trainDirection ? pathDirection : !pathDirection);
+
+
+                // Reset where on the curve on for train to be
+                t = pathDirection ? 0.01 : 0.99;
+                bound = pathDirection ? 0.99 : 0.01;
                 if (i === listTracks.length - 1) {
                     bound = 0.5;
                 }
@@ -214,11 +222,11 @@ var GameBoard = function(two, gameboardJSON) {
                 //reset train to new location
                 var endHexId = pathNodes[pathNodes.length - 1].getHexId();
                 var endHex = hexagonIdMap[endHexId];
-                endHex.drawTrain(track, startHex.getTrain().color, startHex.getTrain().isEngine);
+                endHex.drawTrain(track, trainObj.color, trainObj.isEngine, trainObj.isFacingForward());
                 startHex.removeTrain();
             }
 
-            track.translateOnCurve(t, train);
+            track.translateOnCurve(t, train, trainObj.isFacingForward());
         };
 
         two.bind('update', animateTrain).play();
@@ -226,7 +234,7 @@ var GameBoard = function(two, gameboardJSON) {
 
     /**
      * Returns the direction (positive or negative) along the path from 
-     * start edge to end edge. If positive, return 1, else return -1;
+     * start edge to end edge. If positive, return true, else return false;
      *
      * @param pathNode - PathNode object
      */
@@ -235,9 +243,9 @@ var GameBoard = function(two, gameboardJSON) {
         var endEdge = pathNode.getEndEdge();
 
         if (Math.abs(startEdge - endEdge) === 3) {
-            return startEdge < endEdge ? 1 : -1;
+            return startEdge < endEdge;
         } else if (Math.abs(startEdge - endEdge) % 2 === 0 && startEdge != endEdge) {
-            return ((startEdge + 2) % 6) === endEdge ? 1 : -1;
+            return ((startEdge + 2) % 6) === endEdge
         }
     }
 

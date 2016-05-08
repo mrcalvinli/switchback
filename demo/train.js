@@ -1,8 +1,9 @@
 /**
  * Creates a train (engine or car) and allows for modifications of its state
  * 
+ * @param isForward - true if is going on positive direction of path, false otherwise
  */
-var Train = function(two, path, color, engine) {
+var Train = function(two, path, color, engine, isForward) {
 
     // Instance variables
     var trainId;
@@ -14,30 +15,55 @@ var Train = function(two, path, color, engine) {
     var type;
     var currentPath;
 
-    var moveOnPath = function(t){
+    //====== Instance Methods ==================
+
+    var instMethods = {};
+
+    var moveOnPath = instMethods.moveOnPath = function(t){
         currentPath.translateOnCurve(t,train);
     }
 
-    var remove = function(){
+    var remove = instMethods.remove = function(){
         two.remove(train);
         two.update();
     }
 
-    var getPath = function(){
+    /**
+     * Gets whether the train is facing forward or not
+     */
+    var isFacingForward = instMethods.isFacingForward = function() {
+        return isForward;
+    }
+
+    /** 
+     * Sets direction train is facing, forwards or backwards
+     *
+     * @param isForwardInput - true if facing forward, false if backwards
+     */
+    var setFacingDirection = instMethods.setFacingDirection = function(isForwardInput) {
+        isForward = isForwardInput;
+    }
+
+    var getPath = instMethods.getPath = function(){
         return currentPath;
     }
 
-    var setPath = function(newPath){
+    var setPath = instMethods.setPath = function(newPath){
         currentPath = newPath;
     }
 
-    var translate = function(dx, dy){
+    var translate = instMethods.translate = function(dx, dy){
         train.translation.x+=dx;
         train.translation.y+=dy;
     }
 
     //====== Initialization ===============
     var init = (function() {
+        //set default direction of train
+        if (isForward === undefined) {
+            isForward = true;
+        }
+
         // Create hexagon
         var pos = path.getPointAt(.5);
         //var rect = two.makeRoundedRectangle(pos.x, pos.y, 40, 20, 3);
@@ -68,7 +94,8 @@ var Train = function(two, path, color, engine) {
         train.rotation = Math.atan2(deriv.dy, deriv.dx);*/
         
 
-        path.translateOnCurve(0.5, train);
+        path.translateOnCurve(0.5, train, isForward);
+
 
         currentPath = path;
         type = color;
@@ -83,15 +110,9 @@ var Train = function(two, path, color, engine) {
         two.update();
     })();
 
-    return {
-        isEngine: isEngine,
-        remove: remove,
-        moveOnPath: moveOnPath,
-        setPath: setPath,
-        getPath: getPath,
-        color: type,
-        translate: translate,
-        train: train
+    instMethods.isEngine = isEngine;
+    instMethods.color = type;
+    instMethods.train = train;
 
-    };
+    return instMethods;
 }

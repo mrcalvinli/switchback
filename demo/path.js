@@ -41,8 +41,9 @@ var Path = function(two, path, edge1, edge2) {
      *
      * @param t - position on the curve (0 < t < 1)
      * @param obj - object to place onto curve at given location
+     * @param obj - true if object is facing forward on path, false otherwise
      */
-    var translateOnCurve = function(t, obj) {
+    var translateOnCurve = function(t, obj, isForward) {
         if (Math.abs(edge1 - edge2) === 3) {
             var vertices = path.vertices;
             var dy = vertices[1].y - vertices[0].y;
@@ -60,6 +61,9 @@ var Path = function(two, path, edge1, edge2) {
         //set obj's angle
         var deriv = calcDerivAt(t)
         obj.rotation = Math.atan2(deriv.dy, deriv.dx);
+        if (!isForward) {
+            obj.rotation = (obj.rotation + Math.PI) % (2*Math.PI);
+        }
     }
 
     var translate = function(dx, dy){

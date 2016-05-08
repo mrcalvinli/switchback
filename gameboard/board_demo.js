@@ -27,7 +27,8 @@ $(document).ready(function() {
                     "end": 5
                 },
                 "color": "gold",
-                "engine": true
+                "engine": true,
+                "isForward": true
             }
         ]
     }
