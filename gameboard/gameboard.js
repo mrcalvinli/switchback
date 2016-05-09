@@ -23,7 +23,6 @@ var GameBoard = function(two, gameboardJSON) {
      * Holds which hexagon is clicked on for pathfinding
      */
     var startHexId = null;
-    var endHexId = null;
 
     //====== Public Methods ===================
 
@@ -115,6 +114,8 @@ var GameBoard = function(two, gameboardJSON) {
             var track = hexagon.getTrack(trainJSON.edges.start, trainJSON.edges.end);
 
             hexagon.drawTrain(track, trainJSON.color, trainJSON.engine, trainJSON.isForward);
+
+            //TODO join trains together that should be coupled
         }
     }
 
@@ -138,126 +139,236 @@ var GameBoard = function(two, gameboardJSON) {
                 return;
             }
 
-            var id = $(this).attr('id');
+            var clickedId = $(this).attr('id');
 
             // Check if startHexagon is been selected yet
             if (startHexId === null) {
-                var hexagon = hexagonIdMap[id];
+                var hexagon = hexagonIdMap[clickedId];
                 if (hexagon.getTrain() !== null && hexagon.getTrain().isEngine) {
-                    startHexId = id;
+                    startHexId = clickedId;
                     hexagonIdMap[startHexId].clickedMode(true);
                 }
             } 
             // Check if it's deselecting the startHexagon
-            else if (id === startHexId) {
+            else if (clickedId === startHexId) {
                 hexagonIdMap[startHexId].clickedMode(false);
                 startHexId = null;
             }
             // Perform pathfinding since it's a different hexagon
             else {
-                endHexId = id;
-
                 var startHex = hexagonIdMap[startHexId];
-                var endHex = hexagonIdMap[endHexId];
+                var endHex = hexagonIdMap[clickedId];
 
                 startHex.clickedMode(false);
 
-                var trainMoving = false;
-
-                // Set start hexagon to the end
-                startHexId = endHexId;
-                endHexId = null;
-
                 if (startHex.getTrain() !== null) {
-                    var params = {
-                        RADIUS: RADIUS,
-                        NUM_HORIZONTAL_HEX: NUM_HORIZONTAL_HEX,
-                        NUM_VERTICAL_HEX: NUM_VERTICAL_HEX
-                    };
-                    var train = startHex.getTrain();
-                    var trainTrack = train.getPath();
-                    var pathfinding = PathFinding(hexagonLocMap, params);
-                    
-                    var shortestPathNodes = pathfinding.shortestPath(startHex, endHex, trainTrack);
-                    if (shortestPathNodes !== undefined) {
-                        //Move train
-                        trainMoving = true;
-                        moveTrainsOnPath(shortestPathNodes, startHex);
-                    }
+                    var trainMoved = moveTrain(startHex, endHex);
                 }
 
-                if (trainMoving) {
-                    startHexId = endHexId;
-                    endHexId = null;
+                if (trainMoved) {
+                    startHexId = clickedId;
                 } else {
                     startHexId = null;
-                    endHexId = null;
                 }
             }
         });
     }
 
+    /** 
+     * Moves engine train to destination. Returns true if train can move
+     * to said destination, false otherwise.
+     *
+     * @param engineHex - hexagon with the train engine to move
+     * @param endHex - hexagon destination of the train engine 
+     * @return boolean - true if train will move, false otherwise
+     */
+    var moveTrain = function(engineHex, endHex) {
+        var params = {
+            RADIUS: RADIUS,
+            NUM_HORIZONTAL_HEX: NUM_HORIZONTAL_HEX,
+            NUM_VERTICAL_HEX: NUM_VERTICAL_HEX
+        };
+        var pathfinding = PathFinding(hexagonLocMap, params);
+
+        // Get front and back trains train
+        var engineTrain = engineHex.getTrain();
+        var engineTrack = engineTrain.getPath();
+        var frontTrainInfo = pathfinding.getEndTrainInfo(engineHex, engineTrack.getStartEdge());
+        var backTrainInfo = pathfinding.getEndTrainInfo(engineHex, engineTrack.getEndEdge());
+
+        // Get best path for trains
+        var trainsInfo = [frontTrainInfo, backTrainInfo];
+        var bestTrainPath;
+        var bestTrainInfo;
+        for (var i = 0; i < trainsInfo.length; i++) {
+            var trainInfo = trainsInfo[i];
+            var trainHex = trainInfo.hexagon;
+            var trainTrack = trainHex.getTrain().getPath();
+            var nextEdge = trainInfo.outEdge;
+
+            var trainPath = pathfinding.shortestPath(trainHex, endHex, trainTrack, nextEdge);
+            if (trainPath !== undefined && (bestTrainPath === undefined || trainPath.length < bestTrainPath.length)) {
+                bestTrainPath = trainPath;
+                bestTrainInfo = trainInfo;
+            }
+        }
+        
+        if (bestTrainPath !== undefined) {
+            // Get train path, from one end to the next
+            var trainHex = bestTrainInfo.hexagon;
+            var frontEdge = bestTrainInfo.outEdge;
+            var trainPathNodes = pathfinding.getTrainPath(trainHex, frontEdge);
+
+            // for (var i = 0; i < trainPathNodes.length; i++) {
+            //     console.log(i + ": " + trainPathNodes[i].getHexId());
+            // }
+            // return true;
+
+            // Move train
+            moveTrainsOnPath(engineHex, bestTrainPath, trainPathNodes);
+            return true;
+        }
+
+        return false;
+    }
+
+    // Constants for animating trains
+    // Used for adjusting speed of animations
+    var MIDDLE_T_PARAM = 0.5;
+    var MIN_T_PARAM = 0.01;
+    var MAX_T_PARAM = 0.99;
+    var INCREMENT_STEP = 0.01;
+
     /**
      * Move trains along path
+     *
+     * @param engineHex - Hexagon object with the engine train on it
+     * @param pathNodes - list of PathNodes starting from front car to destination
+     * @param trainPathNodes - list of PathNodes starting from front car to end car, all
+     *                          containing trains
      */
-    var moveTrainsOnPath = function(pathNodes, startHex) {
-        // Get tracks for train to travel on
-        // TOOD: change for multiple trains
-        var listTracks = getTracksForTrain(pathNodes);
+    var moveTrainsOnPath = function(engineHex, pathNodes, trainPathNodes) {
+        // Holds all of the animation parameters for each train
+        var trainAnimationInfoList = [];
+        for (var i = 0; i < trainPathNodes.length; i++) {
+            var animationInfo = {};
+            var trainHexId = trainPathNodes[i].getHexId();
+            var trainHex = hexagonIdMap[trainHexId];
+            var pathDirection = getPathDirection(trainPathNodes[i])
 
-        var t = 0.5;
-        var i = 0;
-        var trainObj = startHex.getTrain();
-        var train = trainObj.train;
-        var track = listTracks[i];
-        var pathDirection = getPathDirection(pathNodes[i]);
-        var dirFactor = pathDirection ? 1 : -1;
-        var trainDirection = pathDirection === trainObj.isFacingForward();
-        var bound = pathDirection ? 0.99 : 0.01;
+            animationInfo.tParam = MIDDLE_T_PARAM;
+            animationInfo.pathIndex = -1*i;
+            animationInfo.bound = pathDirection ? MAX_T_PARAM : MIN_T_PARAM;
+            animationInfo.trainObj = trainHex.getTrain();
+            animationInfo.dirFactor = pathDirection ? 1 : -1;
+            animationInfo.trainDir = pathDirection === trainHex.getTrain().isFacingForward();
 
-        var animateTrain = function() {
-            if (dirFactor * (t - bound) < 0) {
-                t += dirFactor*0.01;
-            } else if (dirFactor * (t - bound) >= 0 && i < listTracks.length - 1) {
-                // Set new track
-                i++;
-                track = listTracks[i];
+            //remove train reference from hexagon
+            trainHex.removeTrainRef();
 
-                // Set direction of train
-                pathDirection = getPathDirection(pathNodes[i]);
-                dirFactor = pathDirection ? 1 : -1;
-                trainObj.setFacingDirection(trainDirection ? pathDirection : !pathDirection);
+            // add to list
+            trainAnimationInfoList.push(animationInfo);
+        }
 
+        // Get the tracks to travel on for all trains
+        var travelPathTracks = getTracksForPath(pathNodes);
+        var trainPathTracks = getTracksForPath(trainPathNodes);
 
-                // Reset where on the curve on for train to be
-                t = pathDirection ? 0.01 : 0.99;
-                bound = pathDirection ? 0.99 : 0.01;
-                if (i === listTracks.length - 1) {
-                    bound = 0.5;
+        var animateTrains = function() {
+            //will be set at the last animation step
+            var endEngineHex;
+
+            // Loop through all trains to animate
+            for (var i = 0; i < trainAnimationInfoList.length; i++) {
+                // Get animation parameters
+                var animationInfo = trainAnimationInfoList[i];
+                var dirFactor = animationInfo.dirFactor;
+                var tParam = animationInfo.tParam;
+                var bound = animationInfo.bound;
+                var pathIndex = animationInfo.pathIndex;
+
+                // Increment train along track
+                if (dirFactor * (tParam - bound) < 0) {
+                    animationInfo.tParam += dirFactor*INCREMENT_STEP;
+                } 
+                // Switch train to new track
+                else if (dirFactor * (tParam - bound) >= 0 && (i + pathIndex) < travelPathTracks.length - 1) {
+                    // Update onto new track
+                    animationInfo.pathIndex++;
+
+                    // Set direction of train
+                    var pathDirection;
+                    if (animationInfo.pathIndex >= 0) {
+                        pathDirection = getPathDirection(pathNodes[animationInfo.pathIndex]);
+                    } else {
+                        pathDirection = getPathDirection(trainPathNodes[-1*animationInfo.pathIndex]);
+                    }
+                    animationInfo.dirFactor = pathDirection ? 1 : -1;
+                    animationInfo.trainObj.setFacingDirection(animationInfo.trainDir ? pathDirection : !pathDirection);
+                    
+                    // Reset where on the curve the train is
+                    animationInfo.tParam = pathDirection ? MIN_T_PARAM : MAX_T_PARAM;
+                    animationInfo.bound = pathDirection ? MAX_T_PARAM : MIN_T_PARAM;
+                    if ((i + animationInfo.pathIndex) === travelPathTracks.length - 1) {
+                        animationInfo.bound = MIDDLE_T_PARAM;
+                    }
                 }
-            } else {
-                two.pause();
-                two.unbind('update', animateTrain);
+                // End animation
+                else {
+                    // Stop the animation once on first train(and not for every train)
+                    if (i === 0) {
+                        two.pause();
+                        two.unbind('update', animateTrains);
+                    }
 
-                //reset train to new location
-                var endHexId = pathNodes[pathNodes.length - 1].getHexId();
-                var endHex = hexagonIdMap[endHexId];
-                endHex.drawTrain(track, trainObj.color, trainObj.isEngine, trainObj.isFacingForward());
-                startHex.removeTrain();
+                    //reset train to new location
+                    var endHexId;
+                    var endTrack;
+                    if (animationInfo.pathIndex >= 0) {
+                        endHexId = pathNodes[animationInfo.pathIndex].getHexId();
+                        endTrack = travelPathTracks[animationInfo.pathIndex];
+                    } else {
+                        endHexId = trainPathNodes[-1*animationInfo.pathIndex].getHexId();
+                        endTrack = trainPathTracks[-1*animationInfo.pathIndex];
+                    }
+                    var endHex = hexagonIdMap[endHexId];
+                    var trainObj = animationInfo.trainObj;
+                    endHex.drawTrain(endTrack, trainObj.color, trainObj.isEngine, trainObj.isFacingForward());
 
-                //reselect hex
-                if (startHexId !== null && startHexId !== endHexId) {
-                    console.log("hi");
-                    hexagonIdMap[startHexId].clickedMode(false);
+                    //Remove old train
+                    trainObj.remove();
+
+                    // Check if it's an engine
+                    if (endHex.getTrain().isEngine) {
+                        endEngineHex = endHex;
+                    }
                 }
-                startHexId = endHexId;
-                hexagonIdMap[startHexId].clickedMode(true);
+
+                // Get the track to animate train on
+                var track; 
+                if (animationInfo.pathIndex >= 0) {
+                    track = travelPathTracks[animationInfo.pathIndex];
+                } else {
+                    track = trainPathTracks[-1*animationInfo.pathIndex];
+                }
+
+                // Move train on track
+                var trainObj = animationInfo.trainObj;
+                var trainTwoObj = trainObj.train;
+                track.translateOnCurve(animationInfo.tParam, trainTwoObj, trainObj.isFacingForward());
             }
 
-            track.translateOnCurve(t, train, trainObj.isFacingForward());
+            // Reselect the engine train at the very end
+            if (!two.playing) {
+                if (startHexId !== null && startHexId !== endEngineHex.getId()) {
+                    hexagonIdMap[startHexId].clickedMode(false);
+                }
+                startHexId = endEngineHex.getId();
+                endEngineHex.clickedMode(true);
+            }
         };
 
-        two.bind('update', animateTrain).play();
+        two.bind('update', animateTrains).play();
     }
 
     /**
@@ -273,17 +384,16 @@ var GameBoard = function(two, gameboardJSON) {
         if (Math.abs(startEdge - endEdge) === 3) {
             return startEdge < endEdge;
         } else if (Math.abs(startEdge - endEdge) % 2 === 0 && startEdge != endEdge) {
-            return ((startEdge + 2) % 6) === endEdge
+            return ((startEdge + 2) % 6) === endEdge;
         }
     }
 
     /**
-     * Given a list of pathNodes, get all the tracks for the train to
-     * traverse on
+     * Given a list of pathNodes, get all the tracks to traverse on
      *
-     * @param pathNodesList - list of PathNodes for train's path
+     * @param pathNodesList - list of PathNodes for path
      */
-    var getTracksForTrain = function(pathNodesList) {
+    var getTracksForPath = function(pathNodesList) {
         var listTracks = [];
 
         for (var i = 0; i < pathNodesList.length; i++) {

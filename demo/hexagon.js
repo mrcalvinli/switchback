@@ -492,6 +492,13 @@ var Hexagon = function(two, xCenter, yCenter, radius, xIndex, yIndex) {
         }
     };
 
+    /**
+     * Removes train reference, but does not destroy the train object
+     */
+    var removeTrainRef = instMethods.removeTrainRef = function() {
+        train = null;
+    }
+
     var removeTarget = instMethods.removeTarget = function(){
         if (target !== null){
             target.remove();

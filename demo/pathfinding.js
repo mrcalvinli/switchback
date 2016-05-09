@@ -170,26 +170,30 @@ var PathFinding = function(hexagonLocMap, params) {
      * @param startHexagon - starting hexagon
      * @param endHexagon - ending hexagon
      * @param startTrack - track (path.js) that train is initially on
+     * @param nextEdge - edge index, referring to edge to look for next adjacent hexagon
      */
-    var shortestPath = instMethods.shortestPath = function(startHexagon, endHexagon, startTrack) {
+    var shortestPath = instMethods.shortestPath = function(startHexagon, endHexagon, startTrack, nextEdge) {
         //Initialize priority queue
         var priorityQueue = PriorityQueue();
 
-        //Put first forward hexagon node (after the startHexagon) into priority queue
-        var startEdges = [startTrack.getStartEdge(), startTrack.getEndEdge()]
-        for (var i = 0; i < startEdges.length; i++) {
-            var startEdge = startEdges[i];
-            var endEdge = startEdges[1 - i];
-            var startHexNode = HexNode(startHexagon, startEdge, 1, heuristic(startHexagon, endHexagon))
-            var nextHexagon = getAdjacentHexagons(startHexagon)[endEdge]
-            if (nextHexagon !== undefined) {
-                var nextHexNode = HexNode(nextHexagon, (endEdge + 3) % 6, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
-                priorityQueue.add(nextHexNode);
-            }
+        // Get correct start and end edges of start track
+        var startEdge;
+        var endEdge = nextEdge;
+        if (nextEdge === startTrack.getStartEdge()) {
+            startEdge = startTrack.getEndEdge();
+        } else {
+            startEdge = startTrack.getStartEdge();
         }
 
-        //Put first backward hexagon node (after startHexagon) into priority queue
+        //Put first forward hexagon node (after the startHexagon) into priority queue
+        var startHexNode = HexNode(startHexagon, startEdge, 1, heuristic(startHexagon, endHexagon))
+        var nextHexagon = getAdjacentHexagons(startHexagon)[endEdge]
+        if (nextHexagon !== undefined) {
+            var nextHexNode = HexNode(nextHexagon, (endEdge + 3) % 6, 1, 1 + heuristic(nextHexagon, endHexagon), startHexNode);
+            priorityQueue.add(nextHexNode);
+        }
 
+        // Find shortest path
         while (priorityQueue.size() > 0) {
             var node = priorityQueue.pop();
             var hexagon = node.getHexagon();
@@ -230,11 +234,81 @@ var PathFinding = function(hexagonLocMap, params) {
                     priorityQueue.add(childNode);
                 }
             }
-
         }
     }
 
-    // Private Methods
+    /**
+     * Finds the end car of the connected trains going through a given edge
+     * of the hexagon (must be one of the edges of the track that the train
+     * is on). 
+     *
+     * If there are no connected trains in that direction, then it will return
+     * the current hexagon, otherwise, it will return the hexagon with the
+     * end car.
+     *
+     * @param engineHex - hexagon with engine train on it
+     * @param adjacentHexEdge - the edge of the train track to continue looking for more 
+     * @return Object {
+     *              "hexagon": Hexagon - hexagon object containing end car
+     *              "outEdge": int - edge index referring to the edge of the end car hexagon where
+     *                                  the adjacent hex doesn't have another train
+     */
+    var getEndTrainInfo = instMethods.getEndTrainInfo = function(engineHex, adjacentHexEdge) {
+        var currentHex = engineHex;
+        var nextEdge = adjacentHexEdge;
+        var nextHex = getAdjacentHexagons(currentHex)[nextEdge];
+        while (nextHex !== undefined && nextHex.getTrain() !== null) {
+            //TODO edit condition above to account for coupled trains
+
+            // Update current hexagon
+            currentHex = nextHex;
+
+            // Update next adjacent edge
+            var currTrainTrack = currentHex.getTrain().getPath();
+            var newEdge = currTrainTrack.getStartEdge();
+            if (nextEdge === (newEdge + 3) % 6) {
+                nextEdge = currTrainTrack.getEndEdge();
+            } else {
+                nextEdge = newEdge;
+            }
+
+            // Update next hexagon
+            nextHex = getAdjacentHexagons(currentHex)[nextEdge];
+        }
+
+        return {
+            "hexagon": currentHex,
+            "outEdge": nextEdge
+        };
+    }
+
+    /**
+     * Gets a list of PathNode objects representing the path from the front train
+     * to the back train
+     *
+     * @param trainHex - Hexagon object containing the front train
+     * @param frontEdge - edge index of the front of the train
+     */
+    var getTrainPath = instMethods.getTrainPath = function(trainHex, frontEdge) {
+        var trainPathList = [];
+        var currHex = trainHex;
+        var endEdge = frontEdge;
+        while (currHex !== undefined && currHex.getTrain() !== null) {
+            var currTrack = currHex.getTrain().getPath();
+            var startEdge = (endEdge === currTrack.getStartEdge()) ? currTrack.getEndEdge() : currTrack.getStartEdge();
+
+            var trainNode = PathNode(currHex.getId(), startEdge, endEdge);
+            trainPathList.push(trainNode);
+
+            // Update to next hexagon
+            currHex = getAdjacentHexagons(currHex)[startEdge];
+            endEdge = (startEdge + 3) % 6;
+        }
+
+        return trainPathList;
+    }
+
+    //====== Private Methods =======================
 
     /**
      * Provides heuristic for distance from one hexagon to another. It is

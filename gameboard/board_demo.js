@@ -19,6 +19,18 @@ $(document).ready(function() {
         "trains": [
             {
                 "hexagonCoord": {
+                    "x": 6,
+                    "y": 4
+                },
+                "edges": {
+                    "start": 2,
+                    "end": 5
+                },
+                "color": "white",
+                "engine": false
+            },
+            {
+                "hexagonCoord": {
                     "x": 7,
                     "y": 4
                 },
@@ -29,6 +41,29 @@ $(document).ready(function() {
                 "color": "white",
                 "engine": true,
                 "isForward": true
+            },
+            {
+                "hexagonCoord": {
+                    "x": 8,
+                    "y": 4
+                },
+                "edges": {
+                    "start": 2,
+                    "end": 5
+                },
+                "color": "white",
+                "engine": false
+            },{
+                "hexagonCoord": {
+                    "x": 9,
+                    "y": 4
+                },
+                "edges": {
+                    "start": 2,
+                    "end": 5
+                },
+                "color": "white",
+                "engine": false
             }
         ]
     }
