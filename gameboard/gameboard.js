@@ -237,7 +237,7 @@ var GameBoard = function(two, gameboardJSON) {
     var MIDDLE_T_PARAM = 0.5;
     var MIN_T_PARAM = 0.01;
     var MAX_T_PARAM = 0.99;
-    var INCREMENT_STEP = 0.01;
+    var INCREMENT_STEP = 0.07;
 
     /**
      * Move trains along path
